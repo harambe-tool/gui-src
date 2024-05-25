@@ -1,8 +1,10 @@
 import React, { useState, useContext } from "react";
 import {AppStateContext} from "./../appStateBackend";
+import { useNavigate } from 'react-router-dom';
 
 export default function Importer() {
   const ctx = useContext(AppStateContext);
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -18,7 +20,8 @@ export default function Importer() {
       reader.onload = (event) => {
         const harContent = JSON.parse(event.target.result);
         ctx.setHarContent(harContent);
-        console.log(ctx.harContent);
+        navigate('/viewer');
+
       };
       reader.readAsText(file);
     }
@@ -42,7 +45,7 @@ export default function Importer() {
             <span style={{ display:"block" }}>{file?.name ?? "No file selected"}</span>
           </label>
         </div>
-          { file && <button onClick={()=>handleUpload} style={{ borderRadius: "5px", padding: "10px", border: "1px solid rgba(255, 255, 255, 0.2)", margin:"50px", background:"rgba(255, 255, 255, 0.05)", cursor: "pointer"}}>
+          { file && <button onClick={()=>handleUpload()} style={{ borderRadius: "5px", padding: "10px", border: "1px solid rgba(255, 255, 255, 0.2)", margin:"50px", background:"rgba(255, 255, 255, 0.05)", cursor: "pointer"}}>
             Get Started
           </button>}
       </div>
