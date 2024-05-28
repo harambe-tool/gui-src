@@ -10,7 +10,7 @@ function App() {
 
   return (
     <AppStateProvider>
-      <div style={{ minHeight: "100vh" }}>
+      <div style={{ minHeight: "100vh", minWidth: "100vw" }}>
         <HashRouter>
           <Routes>
             <Route path="/" index={true} element={<Importer />} />
