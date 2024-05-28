@@ -37,3 +37,7 @@ li::before {
   margin-left: -25px;
   text-shadow: 0px 0px 4px #867cff, 1px 0px 4px #867cff,-1px 0px 4px #867cff,0px 1px 4px #867cff,0px -1px 4px #867cff;
 }
+
+button {
+  transition: 100ms cubic-bezier(0.455, 0.03, 0.515, 0.955) all
+}
