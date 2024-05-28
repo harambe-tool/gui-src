@@ -5,7 +5,15 @@ import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
 
-
+/**
+ * @type {import('reactflow').Node[]}
+ */
+const nodes = [
+    {
+      id: '1',
+      position: { x: 0, y: 0 },
+    },
+  ];
 
 
 export default function Viewer(){
@@ -16,8 +24,8 @@ export default function Viewer(){
     let log = harContent["log"];
     
     return <>
-        <div className='viewer' style={{"width": "100%", "height": "100%"}}>
-            <ReactFlow>
+        <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
+            <ReactFlow proOptions={{ hideAttribution: true }} nodes={nodes} fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
