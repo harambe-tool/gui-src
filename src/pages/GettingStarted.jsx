@@ -29,7 +29,7 @@ export default function Importer() {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <div onDragOver={e=>{e.preventDefault();e.stopPropagation();}} style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
         <div id="banner" style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
           <span style={{ fontSize: "2em" }}>WhoDunnit</span>
           <span>Find links between requests and fuzz with AI.</span>
@@ -39,7 +39,7 @@ export default function Importer() {
           <p>Insert your HAR file here</p>
           <label htmlFor="file-upload" style={{ display: "flex", flexDirection:"column", cursor: "pointer" }}>
             <input ref={inputRef} accept=".har" multiple={false} type="file" id="file-upload" onChange={handleFileChange} style={{ display: "none" }} />
-            <button onClick={()=>{inputRef.current.click()}} style={{ borderRadius: "5px", padding: "10px", border: "1px solid #ccc", background:"rgba(255, 255, 255, 0.05)", cursor: "pointer" }}>
+            <button onDrop={(drag)=>{console.log(drag);drag.preventDefault(); drag.stopPropagation();drag.dataTransfer.files[0] && setFile(drag.dataTransfer.files[0])}} onClick={()=>{inputRef.current.click()}} style={{ borderRadius: "5px", padding: "10px", border: "1px solid #ccc", background:"rgba(255, 255, 255, 0.05)", cursor: "pointer" }}>
               Choose File
             </button>
             <span style={{ display:"block" }}>{file?.name ?? "No file selected"}</span>
