@@ -95,14 +95,19 @@ code {
 
 *::-webkit-scrollbar {
   width: 16px;
+  overflow: hidden;
 }
 
 *::-webkit-scrollbar-track {
   background: #262626;
+  overflow: hidden;
+  border-radius: 10px;
+
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #9d94ff;
   border-radius: 10px;
-  box-shadow: 1px 3px 11px 16px #9d94ff;
+  overflow: hidden;
+
 }

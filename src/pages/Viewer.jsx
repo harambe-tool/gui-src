@@ -27,8 +27,6 @@ function classifier(entry, index_any){
             initiatorURL = "orphan"
             break;
         case "parser":
-            initiatorURL = initiator?.url
-            break;
         case "preflight":
             initiatorURL = initiator?.url
             break;
@@ -89,8 +87,8 @@ function Viewer_providerless(){
                 type: entry["_type"],
                 data: entry,
                 focusable: true,
-                width:300,
-                height:600
+                width:250,
+                height:300
             }
 
             let initiatorIndex = log.entries.findIndex(entry => entry["request"]?.url === initiators[index])
@@ -129,7 +127,7 @@ function Viewer_providerless(){
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
             <ReactFlow minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
-                {/* <Background variant='cross' /> */}
+                <Background />
                 <Controls />
             </ReactFlow>
             <DetailBar log={selectedNode?.data}></DetailBar>

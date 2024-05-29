@@ -27,7 +27,9 @@
 
 .detail-bar {
     overflow: hidden;
+    overflow-y: scroll;
     background:rgba(0, 0, 0, .2);
+    backdrop-filter: blur(10px);
     border:2px solid white;
     box-shadow:0 0 9px 1px rgb(134 124 255);
     height:80vh;
@@ -56,4 +58,10 @@
 .subheader {
     font-weight: bold;
     text-shadow: 2px 2px #867cff;
+}
+
+.sep.small {
+    width: 91%;
+    margin: 12px;
+    margin-inline: auto;
 }
