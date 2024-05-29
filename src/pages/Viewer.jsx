@@ -4,7 +4,7 @@ import { useContext, useMemo } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
-import {HARBase} from "./../ReactflowComponents"
+import {HARBase} from "./../components/ReactflowComponents"
 
 let initiators = {
 
