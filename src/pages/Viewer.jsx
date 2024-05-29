@@ -1,6 +1,6 @@
 import ReactFlow, { Background, Controls, ReactFlowProvider, useOnSelectionChange } from 'reactflow';
 import { AppStateContext } from '../appStateBackend';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
@@ -9,7 +9,7 @@ import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 
 let initiators = []
-
+let initiatorIndexes =[];
 /**
  * Classifier - currently only classifies and groups initiators
  * @param {HAREntry} entry 
@@ -23,11 +23,15 @@ function classifier(entry, index_any){
         case "script":
             initiatorURL = initiator?.stack?.callFrames[0]?.url
             break;
+        case "other":
+            initiatorURL = "orphan"
+            break;
     }
 
     let index = Number(index_any)
+    initiatorURL ??= "orphan"
     initiators[index] = initiatorURL
-    console.log(initiators)
+    // console.log(initiators)
 
     //todo: create `type` for reactflow
     //  analytics_endpoint (posthog, google ads, etc)
@@ -36,12 +40,13 @@ function classifier(entry, index_any){
     //  harBase (initiator : other)
     //  hostedAsset (static hosted scripts - all scripts under same CLD or not recognized from a global provider. Can get from long cache times or file extension)
     //  cdnAsset (3rd party scripts)
-
+    entry["_type"] = "harBase"
     return "harBase"
 }
 
-const layout = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-
+const layout = new Dagre.graphlib.Graph()
+layout.setGraph({});
+layout.setDefaultEdgeLabel(() => ({}));
 function Viewer_providerless(){
     const nodeTypes = useMemo(() => ({ harBase: HARBase }), []);
     let { harContent } = useContext(AppStateContext)
@@ -55,49 +60,54 @@ function Viewer_providerless(){
      * @type {HARLog}
     */
     let log = harContent["log"];
-    console.log(selectedNode)
+    // console.log(selectedNode)
     // can use entry index as ID for nodes
+    log.entries.map((entry, index)=>{classifier(entry,index)})
 
     /**
-     * 
-     * @param {HAREntry} entry 
-     * @param {Number} index 
-     * @returns 
+     * @type {import('reactflow').Node[]}
      */
-    function computePosition(entry, index){
-        entry["initiator"]
-        return { x: 0, y: index * 100 }
-    }
+    let nodes = useMemo(()=> {
+        let values = log.entries.map((entry, index) => {
+            /**
+             * @type {import('reactflow').Node}
+             */
+            let data = {
+                id: index.toString(),
+                type: entry["_type"],
+                data: entry,
+                focusable: true,
+                width:400,
+                height:100
+            }
+            layout.setNode(entry.request.url, data)
+            layout.setEdge(entry.request.url, log.entries.find(entry => entry["request"]?.url === initiators[index])??"orphan")
+            const { x, y } = layout.node(entry.request.url);
+            return {
+                position: { x, y },
+                id: index.toString(),
+                type: entry["_type"],
+                data: entry,
+                focusable: true,
+                width:400,
+                height:100
+            }
+        });
+        Dagre.layout(layout);
+        console.log("layout", layout);
+        console.log(initiators)
+        return values;
+    }, [])
+    // return { ...node, position: { x, y } };
 
-    log.entries.map((entry, index) => {classifier(entry, index)})
-    /**
-    * @type {import('reactflow').Node[]}
-    */
-    let nodes = log.entries.map((entry, index) => {
-
-        let nodeData = {
-            position: computePosition(entry, index),//{ x: 0, y: index * 100 },
-            id: index.toString(),
-            type: classifier(entry, index),
-            data: entry,
-            focusable: true,
-        }
-        return nodeData
-    })
-
-    log.entries.map((entry, index) => {
-        layout.setNode(entry.request.url, {label: entry.request.url+"\n"+entry.request.method, width: 100, height: 100})
-        layout.setEdge(entry.request.url, initiators[index])
-    })
-
-    console.log(layout)
+    console.log(nodes)
 
     if(selectedNode?.id) nodes[Number(selectedNode.id)].selected = true;
 
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
             <ReactFlow onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} nodes={nodes} fitView>
-                <Background />
+                {/* <Background variant='cross' /> */}
                 <Controls />
             </ReactFlow>
             <DetailBar log={selectedNode?.data}></DetailBar>

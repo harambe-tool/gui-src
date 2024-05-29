@@ -13,7 +13,8 @@ function HARBase(props) {
         <span>{props.data.request.url}</span><br></br>
         <span>{props.data.request.method}</span>
       </div>
-      <Handle type="source" position={Position.Bottom} id="a" />
+      <Handle type="source" position={Position.Bottom} id={props.id+"-source"}/>
+      <Handle type="target" position={Position.Top} id={props.id+"-target"} />
       {/* <Handle
         type="source"
         position={Position.Bottom}
