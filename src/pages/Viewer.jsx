@@ -26,8 +26,19 @@ function classifier(entry, index_any){
         case "other":
             initiatorURL = "orphan"
             break;
+        case "parser":
+            initiatorURL = initiator?.url
+            break;
+        case "preflight":
+            initiatorURL = initiator?.url
+            break;
+        // case "xhr":
+            // initiatorURL = initiator?.url
+            // break;
     }
-
+    if (initiator?.stack?.callFrames == []){
+        initiatorURL = initiator?.stack?.parent?.callFrames?.at(0)?.url
+    }
     let index = Number(index_any)
     initiatorURL ??= "orphan"
     initiators[index] = initiatorURL
@@ -45,10 +56,11 @@ function classifier(entry, index_any){
 }
 
 const layout = new Dagre.graphlib.Graph()
-layout.setGraph({});
+layout.setGraph({rankdir:"TB"});
 layout.setDefaultEdgeLabel(() => ({}));
+const nodeTypes = { harBase: HARBase };
+
 function Viewer_providerless(){
-    const nodeTypes = useMemo(() => ({ harBase: HARBase }), []);
     let { harContent } = useContext(AppStateContext)
 
     /**
@@ -65,9 +77,9 @@ function Viewer_providerless(){
     log.entries.map((entry, index)=>{classifier(entry,index)})
 
     /**
-     * @type {import('reactflow').Node[]}
+     * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
-    let nodes = useMemo(()=> {
+    let {nodes, edges} = useMemo(()=> {
         let values = log.entries.map((entry, index) => {
             /**
              * @type {import('reactflow').Node}
@@ -77,36 +89,46 @@ function Viewer_providerless(){
                 type: entry["_type"],
                 data: entry,
                 focusable: true,
-                width:400,
-                height:100
+                width:300,
+                height:600
             }
-            layout.setNode(entry.request.url, data)
-            layout.setEdge(entry.request.url, log.entries.find(entry => entry["request"]?.url === initiators[index])??"orphan")
-            const { x, y } = layout.node(entry.request.url);
-            return {
-                position: { x, y },
-                id: index.toString(),
-                type: entry["_type"],
-                data: entry,
-                focusable: true,
-                width:400,
-                height:100
-            }
-        });
+
+            let initiatorIndex = log.entries.findIndex(entry => entry["request"]?.url === initiators[index])
+            let initiatorID = initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
+            layout.setNode(index.toString(), data)
+            layout.setEdge(initiatorID, `${index}`)
+            return data
+        })
         Dagre.layout(layout);
-        console.log("layout", layout);
-        console.log(initiators)
-        return values;
+        let nodes = []
+        let edges = []
+
+        values.map((entry, index) => {
+            const { x, y } = layout.node(index.toString());
+            nodes.push({
+                position: { x, y },
+                ...entry,
+            })
+
+        });
+        edges = layout.edges()
+        return {nodes,edges};
     }, [])
     // return { ...node, position: { x, y } };
 
-    console.log(nodes)
+    console.log(nodes, edges)
 
     if(selectedNode?.id) nodes[Number(selectedNode.id)].selected = true;
 
+    /**
+     * @type {import('reactflow').Edge[]}
+     */
+    let customEdges = edges.map((edge)=>{return {id:`${edge.v}-${edge.w}`, source:edge.v, target:edge.w}});
+    
+    // edges.
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
-            <ReactFlow onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} nodes={nodes} fitView>
+            <ReactFlow minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 {/* <Background variant='cross' /> */}
                 <Controls />
             </ReactFlow>
