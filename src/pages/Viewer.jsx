@@ -6,23 +6,28 @@ import 'reactflow/dist/style.css';
 // function component
 import {HARBase} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
+import Dagre from '@dagrejs/dagre';
 
-let initiators = {
-
-}
+let initiators = []
 
 /**
  * Classifier - currently only classifies and groups initiators
  * @param {HAREntry} entry 
  */
-function classifier(entry, index){
-    // Store the initiator
-    let initiator = entry["_initiator"]
-    // console.log()
-    if (initiators[initiator] == undefined)
-        initiators[initiator] = []
+function classifier(entry, index_any){
+    // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
+    const initiator = entry["_initiator"]
+    let initiatorType = initiator.type
+    let initiatorURL = ""
+    switch (initiatorType) {
+        case "script":
+            initiatorURL = initiator?.stack?.callFrames[0]?.url
+            break;
+    }
 
-    initiators[initiator].push(index)
+    let index = Number(index_any)
+    initiators[index] = initiatorURL
+    console.log(initiators)
 
     //todo: create `type` for reactflow
     //  analytics_endpoint (posthog, google ads, etc)
@@ -34,6 +39,8 @@ function classifier(entry, index){
 
     return "harBase"
 }
+
+const layout = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
 function Viewer_providerless(){
     const nodeTypes = useMemo(() => ({ harBase: HARBase }), []);
@@ -47,39 +54,43 @@ function Viewer_providerless(){
     /**
      * @type {HARLog}
     */
-   let log = harContent["log"];
-   console.log(selectedNode)
-
+    let log = harContent["log"];
+    console.log(selectedNode)
     // can use entry index as ID for nodes
 
-    // (event: React.MouseEvent, node: Node)
-//    /**
-//     * @type {import('reactflow').Node[]}
-//     */
-//    let old_nodes = [
-//        {
-//          id: '0',
-//          type: 'harBase',
-//          position: { x: 0, y: 0 },
-//          data: log.entries[0],
-//          focusable: true
-//        },
-//      ];
+    /**
+     * 
+     * @param {HAREntry} entry 
+     * @param {Number} index 
+     * @returns 
+     */
+    function computePosition(entry, index){
+        entry["initiator"]
+        return { x: 0, y: index * 100 }
+    }
 
+    log.entries.map((entry, index) => {classifier(entry, index)})
     /**
     * @type {import('reactflow').Node[]}
     */
     let nodes = log.entries.map((entry, index) => {
-        return {
+
+        let nodeData = {
+            position: computePosition(entry, index),//{ x: 0, y: index * 100 },
             id: index.toString(),
             type: classifier(entry, index),
-            position: { x: 0, y: index * 100 },
             data: entry,
-            focusable: true
+            focusable: true,
         }
+        return nodeData
     })
 
+    log.entries.map((entry, index) => {
+        layout.setNode(entry.request.url, {label: entry.request.url+"\n"+entry.request.method, width: 100, height: 100})
+        layout.setEdge(entry.request.url, initiators[index])
+    })
 
+    console.log(layout)
 
     if(selectedNode?.id) nodes[Number(selectedNode.id)].selected = true;
 
