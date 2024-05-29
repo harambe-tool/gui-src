@@ -49,8 +49,35 @@ function Viewer_providerless(){
     */
    let log = harContent["log"];
    console.log(selectedNode)
+
+    // can use entry index as ID for nodes
+
+    // (event: React.MouseEvent, node: Node)
+//    /**
+//     * @type {import('reactflow').Node[]}
+//     */
+//    let old_nodes = [
+//        {
+//          id: '0',
+//          type: 'harBase',
+//          position: { x: 0, y: 0 },
+//          data: log.entries[0],
+//          focusable: true
+//        },
+//      ];
+
+    /**
     * @type {import('reactflow').Node[]}
     */
+    let nodes = log.entries.map((entry, index) => {
+        return {
+            id: index.toString(),
+            type: classifier(entry, index),
+            position: { x: 0, y: index * 100 },
+            data: entry,
+            focusable: true
+        }
+    })
 
 
 
