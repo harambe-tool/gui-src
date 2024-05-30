@@ -4,12 +4,18 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
-import {HARBase} from "./../components/ReactflowComponents"
+import {HARBase, HARImage} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 
 let initiators = []
 let initiatorIndexes =[];
+
+
+function isAnalytics(url){
+    let trackers = ["https://www.google-analytics.com/g/collect"]
+    return trackers.some(tracker => url.includes(tracker))
+}
 /**
  * Classifier - currently only classifies and groups initiators
  * @param {HAREntry} entry 
@@ -49,14 +55,36 @@ function classifier(entry, index_any){
     //  harBase (initiator : other)
     //  hostedAsset (static hosted scripts - all scripts under same CLD or not recognized from a global provider. Can get from long cache times or file extension)
     //  cdnAsset (3rd party scripts)
+    //  media (images, svg, icons, fonts, etc)
     entry["_type"] = "harBase"
+    switch (entry["_resourceType"]){
+        case "image":
+            entry["_type"] = "media"
+            break;
+    }
+    if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
+        entry["_type"] = "media"
+    }
+    if (isAnalytics(entry.request.url)){
+        entry["_type"] = "analytics_endpoint"
+    }
+    // console.log(entry)
     return "harBase"
 }
 
 const layout = new Dagre.graphlib.Graph()
 layout.setGraph({rankdir:"TB"});
 layout.setDefaultEdgeLabel(() => ({}));
-const nodeTypes = { harBase: HARBase };
+
+const nodeTypes = { 
+    harBase: HARBase, 
+    media: HARImage, 
+    analytics_endpoint: HARBase,
+    "apiRequest_external": HARBase,
+    "apiRequest_core": HARBase,
+    "cdnAsset": HARBase,
+    "hostedAsset": HARBase
+};
 
 function Viewer_providerless(){
     let { harContent } = useContext(AppStateContext)

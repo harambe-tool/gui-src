@@ -43,7 +43,7 @@ export default function Importer() {
       
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
           <div id="banner" style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
-            <span style={{ fontSize: "2em" }}>WhoDunnit</span>
+            <span style={{ fontSize: "2em" }}>harhax</span>
             <span>Find links between requests and fuzz with AI.</span>
           </div>
           <div className="sep"></div>
