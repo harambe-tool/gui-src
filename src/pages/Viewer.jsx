@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
-import {HARBase, HARImage} from "./../components/ReactflowComponents"
+import {APIBlock, AnalyticsBlock, HARBase, HARImage} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 
@@ -13,14 +13,16 @@ let initiatorIndexes =[];
 
 
 function isAnalytics(url){
-    let trackers = ["https://www.google-analytics.com/g/collect"]
+    let trackers = ["https://www.google-analytics.com/g/collect", "ads/ga-audiences"]
     return trackers.some(tracker => url.includes(tracker))
 }
 /**
  * Classifier - currently only classifies and groups initiators
  * @param {HAREntry} entry 
+ * @param {number} index_any 
+ * @param {string} pageref 
  */
-function classifier(entry, index_any){
+function classifier(entry, index_any, internalPredicate){
     // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
     const initiator = entry["_initiator"]
     let initiatorType = initiator.type
@@ -65,11 +67,19 @@ function classifier(entry, index_any){
     if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
         entry["_type"] = "media"
     }
+    console.log(entry.request.url)
     if (isAnalytics(entry.request.url)){
         entry["_type"] = "analytics_endpoint"
     }
+
+    let coreURL = new URL(entry.request.url).hostname.split(".");
+    console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
+    if (internalPredicate(coreURL) && entry.response.content.mimeType.startsWith("application/json")){
+        entry["_type"] = "apiRequest_core"
+    }
+
     // console.log(entry)
-    return "harBase"
+    // return "harBase"
 }
 
 const layout = new Dagre.graphlib.Graph()
@@ -79,9 +89,9 @@ layout.setDefaultEdgeLabel(() => ({}));
 const nodeTypes = { 
     harBase: HARBase, 
     media: HARImage, 
-    analytics_endpoint: HARBase,
+    analytics_endpoint: AnalyticsBlock,
     "apiRequest_external": HARBase,
-    "apiRequest_core": HARBase,
+    "apiRequest_core": APIBlock,
     "cdnAsset": HARBase,
     "hostedAsset": HARBase
 };
@@ -98,10 +108,16 @@ function Viewer_providerless(){
      * @type {HARLog}
     */
     let log = harContent["log"];
+    
+    let keywords = log.pages.flatMap((page)=>new URL(page.title).hostname.split(".").slice(0,-1))
+    console.log(keywords)
+    const isInternal = (comparisonList)=>keywords.some(keyword => comparisonList.includes(keyword))
+
+    
     // console.log(selectedNode)
     // can use entry index as ID for nodes
-    log.entries.map((entry, index)=>{classifier(entry,index)})
-
+    log.entries.map((entry, index)=>{classifier(entry,index, isInternal)})
+    
     /**
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
@@ -150,7 +166,7 @@ function Viewer_providerless(){
      * @type {import('reactflow').Edge[]}
      */
     let customEdges = edges.map((edge)=>{return {id:`${edge.v}-${edge.w}`, source:edge.v, target:edge.w}});
-    
+
     // edges.
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>

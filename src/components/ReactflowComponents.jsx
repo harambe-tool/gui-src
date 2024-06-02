@@ -3,6 +3,13 @@ import { Handle, Position } from 'reactflow';
 const handleStyle = { left: 10 };
 import "./Components.css"
 
+import { MdDataObject } from "react-icons/md";
+import hljs from 'highlight.js/lib/core';
+import json from 'highlight.js/lib/languages/json';
+import "highlight.js/styles/github.css";
+
+hljs.registerLanguage('json', json);
+
 function CardCore(props){
   return (
     <>
@@ -22,12 +29,9 @@ function CardCore(props){
 function HARCard(props) {
   return (
     <>
-      <div className={`card ${props.selected ? "selected" : ""}`}>
-        <span>{props.data.request.url}</span><br></br>
-        <span>{props.data.request.method}</span>
-      </div>
-      <Handle type="source" position={Position.Bottom} id={props.id+"-source"}/>
-      <Handle type="target" position={Position.Top} id={props.id+"-target"} />
+    <CardCore selected={props.selected}>
+      <span>{props.data.request.url}<br />{props.data.request.method}</span>
+    </CardCore>
     </>
   );
 }
@@ -55,12 +59,16 @@ function HARImage(props) {
   let content = props.data.response.content
   return (
     <>
-      <div className={`card image ${props.selected ? "selected" : ""}`}>
+      <CardCore selected={props.selected} className="image">
+        <span><b>{hostname}</b><br />{pathname}</span>
+        <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} />
+      </CardCore>
+      {/* <div className={`card image ${props.selected ? "selected" : ""}`}>
         <span><b>{hostname}</b><br />{pathname}</span><br></br>
         <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} />
       </div>
       <Handle type="source" position={Position.Bottom} id={props.id+"-source"}/>
-      <Handle type="target" position={Position.Top} id={props.id+"-target"} />
+      <Handle type="target" position={Position.Top} id={props.id+"-target"} /> */}
     </>
   );
 }
@@ -71,6 +79,23 @@ function JSONBlock(props){
   // determine whether or not to use jsonblock through response content type
 }
 
+
+function CodeGenBlock({code}){
+  let JSONBody = JSON.parse(code)
+  let prettifiedJSON = JSON.stringify(JSONBody, null, 2)
+  console.log(prettifiedJSON)
+  let code_formatted = hljs.highlight(prettifiedJSON, {language: "json"}).value
+  return <pre>
+    <code>
+      <div dangerouslySetInnerHTML = {{__html:code_formatted}}></div>
+    </code>
+  </pre>
+}
+
+/**
+ * For API requests
+ * @param {import('reactflow').NodeProps<HAREntry>} props 
+ */
 function APIBlock(props){
   //HLJS
   // Stub
@@ -78,6 +103,23 @@ function APIBlock(props){
   //   Response body type is application/json
   //   Request body type is application/json
   // then we are using a REST API.
+
+  
+  return <CardCore selected={props.selected} className="api">
+    <MdDataObject />
+    <span>{props.data.request.method} {props.data.request.url}</span>
+
+    { props.data.request.method == "POST" && <>
+        <span>Request</span>
+        <CodeGenBlock code={props.data.request.postData.text} />
+    </> }
+    { (props.data.response.content.size > 0 && props.data.response.content.mimeType == "application/json") && <>
+        <span>Response</span>
+        <CodeGenBlock code={props.data.response.content.text} />
+    </> }
+    <br></br>
+    <br></br>
+  </CardCore>
 }
 
 
@@ -91,9 +133,17 @@ function WebsocketBlock(props){
   })
 }
 
+/**
+ * For Analytics like Google Analytics, posthog, etc
+ * @param {import('reactflow').NodeProps<HAREntry>} props 
+ */
 function AnalyticsBlock(props){
-  return <>
-  </>
+  let {hostname, pathname} = new URL(props.data.request.url)
+  return <CardCore selected={props.selected} className="analytics">
+    <span><b>{hostname}</b><br />{pathname}</span>
+
+    {/* <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} /> */}
+  </CardCore>
 }
 
-export {HARCard as HARBase, HARImage, WebsocketBlock}
+export {HARCard as HARBase, HARImage, WebsocketBlock, AnalyticsBlock, APIBlock}

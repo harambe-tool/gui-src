@@ -19,3 +19,26 @@
     background:rgba(255,255,255,0.2);
     border:2px solid rgba(134, 124, 255, 1);
 }
+
+.card.analytics {
+    outline: 1px solid oklch(0.66 0.19 76.4 / 1);
+    border: none;
+}
+.card.analytics.selected {
+    outline: 2px solid oklch(0.66 0.19 76.4 / 1);
+    /* box-shadow: inset 0px 0px 16px 0px oklch(0.66 0.19 76.4 / .8); */
+    border: none;
+}
+.card.analytics b {
+    text-shadow: 1px 1px oklch(0.66 0.19 76.4 / 1);
+}
+.card.analytics.selected b {
+    text-shadow: 2px 2px oklch(0.66 0.19 76.4 / 1);
+}
+
+.card.api pre {
+    background: #11192e;
+    padding: 5px;
+    width: fit-content;
+    border-radius: 12px;
+}
