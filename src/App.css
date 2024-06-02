@@ -23,10 +23,12 @@ ul {
   color: #0099ff;
 }
 
-pre {
+
+/* TODO: Investigate why this CSS was even written */
+/* pre {
   margin-inline: 10vw;
   overflow: hidden;
-}
+} */
 
 
 

@@ -74,7 +74,7 @@ p b, a, h1 b, span b {
   border-top: 2px solid white;
 }
 
-code {
+/* code {
   padding-inline: .2em;
   margin: 0;
   font-size: 85%;
@@ -91,7 +91,7 @@ code {
   line-height: inherit;
   word-wrap: normal;
   border: 0;
-}
+} */
 
 *::-webkit-scrollbar {
   width: 16px;
