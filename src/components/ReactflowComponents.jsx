@@ -10,10 +10,43 @@ import "highlight.js/styles/github.css";
 
 hljs.registerLanguage('json', json);
 
+let customWidthMappings = { 
+  // harBase: HARBase, 
+  // media: HARImage, 
+  analytics_endpoint: {
+    width:200,
+    height:175
+  },
+  "apiRequest_external": {
+      width:700
+  },
+  "apiRequest_core": {
+      width:700,
+  },
+  "default": {
+    width:250,
+    height:300
+  }
+  // "cdnAsset": HARBase,
+  // "hostedAsset": HARBase
+};
+
+function mapToDimension(type){
+  let width = customWidthMappings[type]?.width 
+  let height = customWidthMappings[type]?.height
+
+  return {
+    width: customWidthMappings[type]?.width ??  customWidthMappings["default"]["width"],
+    height: customWidthMappings[type]?.height ??  customWidthMappings["default"]["height"]
+  }
+}
+
 function CardCore(props){
+  // console.log(props)
+  let dimensions = mapToDimension(props.type)
   return (
     <>
-      <div className={`card ${props.className} ${props.selected ? "selected" : ""}`}>
+      <div className={`card ${props.className} ${props.selected ? "selected" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
         {props.children}
       </div>
       <Handle type="source" position={Position.Bottom} id={props.id+"-source"}/>
@@ -27,9 +60,10 @@ function CardCore(props){
  * @param {import('reactflow').NodeProps<HAREntry>} props 
  */
 function HARCard(props) {
+  
   return (
     <>
-    <CardCore selected={props.selected}>
+    <CardCore type={props.type} selected={props.selected}>
       <span>{props.data.request.url}<br />{props.data.request.method}</span>
     </CardCore>
     </>
@@ -59,7 +93,7 @@ function HARImage(props) {
   let content = props.data.response.content
   return (
     <>
-      <CardCore selected={props.selected} className="image">
+      <CardCore type={props.type} selected={props.selected} className="image">
         <span><b>{hostname}</b><br />{pathname}</span>
         <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} />
       </CardCore>
@@ -105,7 +139,7 @@ function APIBlock(props){
   // then we are using a REST API.
 
   
-  return <CardCore selected={props.selected} className="api">
+  return <CardCore type={props.type} selected={props.selected} className="api">
     <MdDataObject />
     <span>{props.data.request.method} {props.data.request.url}</span>
 
@@ -139,11 +173,11 @@ function WebsocketBlock(props){
  */
 function AnalyticsBlock(props){
   let {hostname, pathname} = new URL(props.data.request.url)
-  return <CardCore selected={props.selected} className="analytics">
+  return <CardCore type={props.type} selected={props.selected} className="analytics">
     <span><b>{hostname}</b><br />{pathname}</span>
 
     {/* <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} /> */}
   </CardCore>
 }
 
-export {HARCard as HARBase, HARImage, WebsocketBlock, AnalyticsBlock, APIBlock}
+export {HARCard as HARBase, HARImage, WebsocketBlock, AnalyticsBlock, APIBlock, customWidthMappings, mapToDimension}

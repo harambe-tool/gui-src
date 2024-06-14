@@ -40,5 +40,6 @@
     background: #11192e;
     padding: 5px;
     width: fit-content;
+    min-width: calc(100% - 10px);
     border-radius: 12px;
 }

@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
-import {APIBlock, AnalyticsBlock, HARBase, HARImage} from "./../components/ReactflowComponents"
+import {APIBlock, AnalyticsBlock, HARBase, HARImage, customWidthMappings, mapToDimension} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 
@@ -67,13 +67,13 @@ function classifier(entry, index_any, internalPredicate){
     if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
         entry["_type"] = "media"
     }
-    console.log(entry.request.url)
+    // console.log(entry.request.url)
     if (isAnalytics(entry.request.url)){
         entry["_type"] = "analytics_endpoint"
     }
 
     let coreURL = new URL(entry.request.url).hostname.split(".");
-    console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
+    // console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
     if (internalPredicate(coreURL) && entry.response.content.mimeType.startsWith("application/json")){
         entry["_type"] = "apiRequest_core"
     }
@@ -81,6 +81,8 @@ function classifier(entry, index_any, internalPredicate){
     // console.log(entry)
     // return "harBase"
 }
+
+
 
 const layout = new Dagre.graphlib.Graph()
 layout.setGraph({rankdir:"TB"});
@@ -110,7 +112,7 @@ function Viewer_providerless(){
     let log = harContent["log"];
     
     let keywords = log.pages.flatMap((page)=>new URL(page.title).hostname.split(".").slice(0,-1))
-    console.log(keywords)
+    // console.log(keywords)
     const isInternal = (comparisonList)=>keywords.some(keyword => comparisonList.includes(keyword))
 
     
@@ -123,6 +125,7 @@ function Viewer_providerless(){
      */
     let {nodes, edges} = useMemo(()=> {
         let values = log.entries.map((entry, index) => {
+            
             /**
              * @type {import('reactflow').Node}
              */
@@ -131,9 +134,11 @@ function Viewer_providerless(){
                 type: entry["_type"],
                 data: entry,
                 focusable: true,
-                width:250,
-                height:300
+                ...mapToDimension(entry["_type"])
+                // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
+                // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
             }
+            console.log(data)
 
             let initiatorIndex = log.entries.findIndex(entry => entry["request"]?.url === initiators[index])
             let initiatorID = initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
@@ -146,9 +151,12 @@ function Viewer_providerless(){
         let edges = []
 
         values.map((entry, index) => {
-            const { x, y } = layout.node(index.toString());
+            const { x, y, width, height } = layout.node(index.toString());
             nodes.push({
-                position: { x, y },
+                position: {
+                    x: x - width / 2,
+                    y: y - height / 2,
+                },
                 ...entry,
             })
 
