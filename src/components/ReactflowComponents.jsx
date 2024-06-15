@@ -115,9 +115,15 @@ function JSONBlock(props){
 
 
 function CodeGenBlock({code}){
-  let JSONBody = JSON.parse(code)
-  let prettifiedJSON = JSON.stringify(JSONBody, null, 2)
-  console.log(prettifiedJSON)
+
+  let prettifiedJSON = code
+
+  try {
+    prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
+  } catch (error) {
+    console.log(error)
+  }
+  // prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
   let code_formatted = hljs.highlight(prettifiedJSON, {language: "json"}).value
   return <pre>
     <code>
@@ -140,16 +146,18 @@ function APIBlock(props){
 
   
   return <CardCore type={props.type} selected={props.selected} className="api">
-    <MdDataObject />
-    <span>{props.data.request.method} {props.data.request.url}</span>
-
-    { props.data.request.method == "POST" && <>
+    <MdDataObject />  <span>{props.data.request.method}</span>
+    <br />
+    <span> {props.data.request.url}</span>
+    { (props.data.request.method == "POST" && props.data.request.postData != undefined && props.data.request.postData.text != undefined && props.data.request.postData.text.length > 0 && props.data.request.postData.mimeType == "application/json") && <>
+        <br></br>
         <span>Request</span>
         <CodeGenBlock code={props.data.request.postData.text} />
     </> }
-    { (props.data.response.content.size > 0 && props.data.response.content.mimeType == "application/json") && <>
+    { (props.data.response != undefined && props.data.response.content != undefined && props.data.response.content.size > 0 && props.data.response.content.mimeType == "application/json") && <>
+        <br></br>
         <span>Response</span>
-        <CodeGenBlock code={props.data.response.content.text} />
+        <CodeGenBlock code={props.data.response.content?.text} />
     </> }
     <br></br>
     <br></br>

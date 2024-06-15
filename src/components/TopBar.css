@@ -1,0 +1,36 @@
+.topbar {
+    width: 100%;
+    display: flex;
+    position: absolute;
+    z-index: 100;
+    padding: 20px;
+    box-sizing: border-box;
+    background: #050a16;
+    border-bottom: 2px solid white;
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.topbar > div {
+    width:100%;
+    display:flex;
+    justify-content: center;
+
+}
+
+.center span {
+    max-width:30em;
+    text-overflow: ellipsis;
+    overflow:hidden;
+}
+
+.topbar > .left {
+    justify-content: left;
+}
+.topbar > .right {
+    justify-content: right;
+}
+.left > * {
+    margin-right:1em;
+}

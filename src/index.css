@@ -17,7 +17,7 @@
 body {
   margin: 0;
   color: #ffffff !important;
-  background-color: #11192e;
+  background-color: #010613;
   -webkit-box-shadow: inset 1px 1px 20px -9px #867cff;
   box-shadow: inset 1px 1px 20px -9px #867cff;
   min-height: 100vh;
@@ -99,15 +99,27 @@ code {
 }
 
 *::-webkit-scrollbar-track {
-  background: #262626;
+  background: #2626265c;
   overflow: hidden;
-  border-radius: 10px;
-
+  border-radius: 100px;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #9d94ff;
-  border-radius: 10px;
+  border-radius: 100px;
   overflow: hidden;
 
+}
+*::-webkit-scrollbar-corner {
+  background:transparent;
+  display:none;
+}
+
+button { 
+  border-radius: 5px;
+  padding: 10px;
+  border:  1px solid rgba(255, 255, 255, 0.2);
+  /* margin: 50px; */
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
 }

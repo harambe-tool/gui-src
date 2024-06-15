@@ -7,6 +7,7 @@ import 'reactflow/dist/style.css';
 import {APIBlock, AnalyticsBlock, HARBase, HARImage, customWidthMappings, mapToDimension} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
+import TopBar from '../components/TopBar';
 
 let initiators = []
 let initiatorIndexes =[];
@@ -49,6 +50,8 @@ function classifier(entry, index_any, internalPredicate){
     initiatorURL ??= "orphan"
     initiators[index] = initiatorURL
     // console.log(initiators)
+    let coreURL = new URL(entry.request.url).hostname.split(".");
+    let isInternal = internalPredicate(coreURL)
 
     //todo: create `type` for reactflow
     //  analytics_endpoint (posthog, google ads, etc)
@@ -63,6 +66,8 @@ function classifier(entry, index_any, internalPredicate){
         case "image":
             entry["_type"] = "media"
             break;
+        case "script":
+            entry["_type"] = isInternal ? "hostedAsset" : "cdnAsset" 
     }
     if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
         entry["_type"] = "media"
@@ -72,12 +77,14 @@ function classifier(entry, index_any, internalPredicate){
         entry["_type"] = "analytics_endpoint"
     }
 
-    let coreURL = new URL(entry.request.url).hostname.split(".");
     // console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
-    if (internalPredicate(coreURL) && entry.response.content.mimeType.startsWith("application/json")){
+    if (isInternal && entry.response.content.mimeType.startsWith("application/json")){
         entry["_type"] = "apiRequest_core"
     }
 
+    // if (entry.response.content.mimeType.startsWith("text/javascript")){
+    //     entry["_type"] = isInternal ? "hostedAsset" : "cdnAsset" 
+    // }
     // console.log(entry)
     // return "harBase"
 }
@@ -89,9 +96,9 @@ layout.setGraph({rankdir:"TB"});
 layout.setDefaultEdgeLabel(() => ({}));
 
 const nodeTypes = { 
-    harBase: HARBase, 
-    media: HARImage, 
-    analytics_endpoint: AnalyticsBlock,
+    "harBase": HARBase, 
+    "media": HARImage, 
+    "analytics_endpoint": AnalyticsBlock,
     "apiRequest_external": HARBase,
     "apiRequest_core": APIBlock,
     "cdnAsset": HARBase,
@@ -134,9 +141,10 @@ function Viewer_providerless(){
                 type: entry["_type"],
                 data: entry,
                 focusable: true,
-                ...mapToDimension(entry["_type"])
+                ...mapToDimension(entry["_type"]),
                 // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
                 // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
+                rank: entry["_type"] == "media" ? 3 : 2 
             }
             console.log(data)
 
@@ -178,6 +186,7 @@ function Viewer_providerless(){
     // edges.
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
+            <TopBar selectedNode={selectedNode}></TopBar>
             <ReactFlow minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 <Background />
                 <Controls />
@@ -187,7 +196,32 @@ function Viewer_providerless(){
     </>
 }
 
+// Adding a top bar allows for more clear cut action paths to take
+
+// Inactive - no node selected
+// either gray out the buttons or dont include them at all
+// Left side: Active, but all disabled
+// Center "Select a node to get started",
+// Right side: Core API seeker [only shows REST API endpoints - hides CSS, Images, Analytics, etc]
+
+// Active
+// Left side:
+// Details #4 [Button to view expanded details in a modal]
+// Button to highlight / Add extra attention to this node
+// [...more]
+// Center
+// Inspecting [type_icon] https://example.com/
+// ||
+// Inspecting [type_icon] https://example.com/long_url/no_fit_he...\
+// Right Side
+// Core API seeker [only shows REST API endpoints - hides CSS, Images, Analytics, etc]
+// [...more]
+
+
+
+
 export default function Viewer(){
+    
     return <ReactFlowProvider>
         <Viewer_providerless></Viewer_providerless>
     </ReactFlowProvider>
