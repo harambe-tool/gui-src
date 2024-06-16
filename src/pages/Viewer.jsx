@@ -1,4 +1,4 @@
-import ReactFlow, { Background, Controls, ReactFlowProvider, useOnSelectionChange } from 'reactflow';
+import ReactFlow, { Background, Controls, ReactFlowProvider, useOnSelectionChange, useReactFlow } from 'reactflow';
 import { AppStateContext } from '../appStateBackend';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
@@ -13,8 +13,21 @@ let initiators = []
 let initiatorIndexes =[];
 
 
+const trackers = [
+    "https://www.google-analytics.com/g/collect", 
+    "ads/ga-audiences", 
+    "googleads", 
+    "adservice", 
+    "ad.doubleclick", 
+    "pagead/landing", 
+    "fullstory.com", 
+    "loglady.", 
+    "ingest.sentry.io", 
+    "bat.bing.com/p/insights", 
+    "fbevents",
+    "https://play.google.com/log"
+]
 function isAnalytics(url){
-    let trackers = ["https://www.google-analytics.com/g/collect", "ads/ga-audiences"]
     return trackers.some(tracker => url.includes(tracker))
 }
 /**
@@ -91,7 +104,7 @@ function classifier(entry, index_any, internalPredicate){
 
 
 
-const layout = new Dagre.graphlib.Graph()
+let layout = new Dagre.graphlib.Graph()
 layout.setGraph({rankdir:"TB"});
 layout.setDefaultEdgeLabel(() => ({}));
 
@@ -107,12 +120,12 @@ const nodeTypes = {
 
 function Viewer_providerless(){
     let { harContent } = useContext(AppStateContext)
-
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
-     */
-    let [selectedNode, setSelectedNode] = useState(null);
-
+    */
+   let [selectedNode, setSelectedNode] = useState(null);
+   let [filter, setFilter] = useState("all");
+    
     /**
      * @type {HARLog}
     */
@@ -131,8 +144,13 @@ function Viewer_providerless(){
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
     let {nodes, edges} = useMemo(()=> {
-        let values = log.entries.map((entry, index) => {
-            
+        layout = new Dagre.graphlib.Graph()
+        layout.setGraph({rankdir:"TB"});
+        layout.setDefaultEdgeLabel(() => ({}));
+
+        let values = log.entries;
+        values = filter == "all" ? values : values.filter((entry)=>entry["_type"] == filter)
+        values = values.map((entry, index) => {
             /**
              * @type {import('reactflow').Node}
              */
@@ -144,7 +162,7 @@ function Viewer_providerless(){
                 ...mapToDimension(entry["_type"]),
                 // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
                 // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
-                rank: entry["_type"] == "media" ? 3 : 2 
+                // rank: entry["_type"] == "media" ? 3 : 2 
             }
             console.log(data)
 
@@ -158,6 +176,7 @@ function Viewer_providerless(){
         let nodes = []
         let edges = []
 
+        // TODO: See if this whole memoized function can be optimized
         values.map((entry, index) => {
             const { x, y, width, height } = layout.node(index.toString());
             nodes.push({
@@ -171,12 +190,12 @@ function Viewer_providerless(){
         });
         edges = layout.edges()
         return {nodes,edges};
-    }, [])
+    }, [filter])
     // return { ...node, position: { x, y } };
 
     console.log(nodes, edges)
 
-    if(selectedNode?.id) nodes[Number(selectedNode.id)].selected = true;
+    if(selectedNode?.id && selectedNode.id ) nodes[Number(selectedNode.id)].selected = true;
 
     /**
      * @type {import('reactflow').Edge[]}
@@ -186,8 +205,8 @@ function Viewer_providerless(){
     // edges.
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
-            <TopBar selectedNode={selectedNode}></TopBar>
-            <ReactFlow minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
+            <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
+            <ReactFlow selectNodesOnDrag={true} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
