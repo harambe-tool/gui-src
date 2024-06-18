@@ -102,7 +102,7 @@ function classifier(entry, index_any, internalPredicate){
     // return "harBase"
 }
 
-
+let decomposedPaths = []
 
 let layout = new Dagre.graphlib.Graph()
 layout.setGraph({rankdir:"TB"});
@@ -115,7 +115,8 @@ const nodeTypes = {
     "apiRequest_external": HARBase,
     "apiRequest_core": APIBlock,
     "cdnAsset": HARBase,
-    "hostedAsset": HARBase
+    "hostedAsset": HARBase,
+    "api_path": HARBase
 };
 
 function Viewer_providerless(){
@@ -138,7 +139,59 @@ function Viewer_providerless(){
     
     // console.log(selectedNode)
     // can use entry index as ID for nodes
-    log.entries.map((entry, index)=>{classifier(entry,index, isInternal)})
+        // go through all API reqs?
+        // split by `/` and get each slug
+        // build a "tree"
+        // ```json
+        // {
+        // "services.balling.com" : {
+        //     "api":{
+        //          "users":[
+        //              "128303443",
+        //              "120385945"
+        //          ],
+        //          "posts":[
+        //              "edit",
+        //              "view"
+        //          ]
+        //     }
+        // }
+        // }```
+
+        //  decomposedPaths = {}
+        //  id : /api/users/128303443 
+        //  label : 128303443
+        // id : /api/users/ 
+        //  label : users
+        // id: /api/ 
+        //  label : api
+
+        // decompostedPaths = [ {"id":"/api/users/128303443","label":"128303443"}, {"id":"/api/users/","label":"users"}, {"id":"/api/","label":"api"} ]
+
+    log.entries.map((entry, index)=>{
+        classifier(entry,index, isInternal)
+        if (entry["_type"] == "apiRequest_core"){
+            let url = new URL(entry.request.url)
+            // console.log(url.origin) 
+            let decomposedPath = (url.hostname+url.pathname).split("/")
+            console.log(decomposedPath)
+            
+            // let ending = decomposedPath.pop()
+            // define recursive function for building this tree based on the slugs
+            decomposedPath.map((slug,index,full)=>{
+                let fullPath = full.slice(0,index+1).join("/")
+                console.log(fullPath)
+                decomposedPaths.push({
+                    id: decomposedPaths.length,
+                    path: fullPath,
+                    label: slug
+                })
+            })
+            
+            // decomposedPaths[fullPath][ending] = true
+        }
+    })
+    console.log(decomposedPaths)
     
     /**
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
@@ -193,7 +246,7 @@ function Viewer_providerless(){
     }, [filter])
     // return { ...node, position: { x, y } };
 
-    console.log(nodes, edges)
+    console.log(nodes)
 
     if(selectedNode?.id && selectedNode.id ) nodes[Number(selectedNode.id)].selected = true;
 

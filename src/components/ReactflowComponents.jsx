@@ -154,10 +154,10 @@ function APIBlock(props){
         <span>Request</span>
         <CodeGenBlock code={props.data.request.postData.text} />
     </> }
-    { (props.data.response != undefined && props.data.response.content != undefined && props.data.response.content.size > 0 && props.data.response.content.mimeType == "application/json") && <>
+    { (props.data.response != undefined && props.data.response.content != undefined && props.data.response.content.text != undefined && props.data.response.content.size > 0 && props.data.response.content.mimeType == "application/json") && <>
         <br></br>
         <span>Response</span>
-        <CodeGenBlock code={props.data.response.content?.text} />
+        <CodeGenBlock code={props.data.response.content.text} />
     </> }
     <br></br>
     <br></br>
