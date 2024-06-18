@@ -9,7 +9,7 @@ import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 import TopBar from '../components/TopBar';
 
-let initiators = []
+let initiators = {}
 let initiatorIndexes =[];
 
 
@@ -37,6 +37,7 @@ function isAnalytics(url){
  * @param {string} pageref 
  */
 function classifier(entry, index_any, internalPredicate){
+    let type = "harBase"
     // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
     const initiator = entry["_initiator"]
     let initiatorType = initiator.type
@@ -59,9 +60,9 @@ function classifier(entry, index_any, internalPredicate){
     if (initiator?.stack?.callFrames == []){
         initiatorURL = initiator?.stack?.parent?.callFrames?.at(0)?.url
     }
-    let index = Number(index_any)
+    // let index = Number(index_any)
     initiatorURL ??= "orphan"
-    initiators[index] = initiatorURL
+    // initiators[index] = initiatorURL
     // console.log(initiators)
     let coreURL = new URL(entry.request.url).hostname.split(".");
     let isInternal = internalPredicate(coreURL)
@@ -74,25 +75,25 @@ function classifier(entry, index_any, internalPredicate){
     //  hostedAsset (static hosted scripts - all scripts under same CLD or not recognized from a global provider. Can get from long cache times or file extension)
     //  cdnAsset (3rd party scripts)
     //  media (images, svg, icons, fonts, etc)
-    entry["_type"] = "harBase"
+    type = "harBase"
     switch (entry["_resourceType"]){
         case "image":
-            entry["_type"] = "media"
+            type = "media"
             break;
         case "script":
-            entry["_type"] = isInternal ? "hostedAsset" : "cdnAsset" 
+            type = isInternal ? "hostedAsset" : "cdnAsset" 
     }
     if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
-        entry["_type"] = "media"
+       type = "media"
     }
     // console.log(entry.request.url)
     if (isAnalytics(entry.request.url)){
-        entry["_type"] = "analytics_endpoint"
+        type = "analytics_endpoint"
     }
 
     // console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
     if (isInternal && entry.response.content.mimeType.startsWith("application/json")){
-        entry["_type"] = "apiRequest_core"
+        type = "apiRequest_core"
     }
 
     // if (entry.response.content.mimeType.startsWith("text/javascript")){
@@ -100,6 +101,10 @@ function classifier(entry, index_any, internalPredicate){
     // }
     // console.log(entry)
     // return "harBase"
+    return {
+        type,
+        initiator: initiatorURL
+    };
 }
 
 
@@ -183,24 +188,32 @@ function Viewer_providerless(){
 
         // decompostedPaths = [ {"id":"/api/users/128303443","label":"128303443"}, {"id":"/api/users/","label":"users"}, {"id":"/api/","label":"api"} ]
 
-    log.entries.map((entry, index)=>{
-        classifier(entry,index, isInternal)
-        if (entry["_type"] == "apiRequest_core"){
-            buildDescendingPath(entry, index)
-            
-            // decomposedPaths[fullPath][ending] = true
-        }
-    })
+    let classifiedEntries = useMemo(()=>{
+        // REFACTOR IN PROGRESS
+        return log.entries.map((entry, index)=>{
+            let entryClone = {...entry}
+            let classified = classifier(entry,index, isInternal)
+            entryClone["_type"] = classified.type
+            entryClone["_initiator_harambe"] = classified.initiator
+            if (entry["_type"] == "apiRequest_core"){
+                buildDescendingPath(entry, index)
+                // decomposedPaths[fullPath][ending] = true
+            }
+            return entryClone
+            // console.log(entry)
+        })
+    }) 
     console.log(decomposedPaths)
     /**
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
     let {nodes, edges} = useMemo(()=> {
+
         layout = new Dagre.graphlib.Graph()
         layout.setGraph({rankdir:"TB"});
         layout.setDefaultEdgeLabel(() => ({}));
 
-        let values = log.entries;
+        let values = classifiedEntries;
         values = filter == "all" ? values : values.filter((entry)=>entry["_type"] == filter)
         values = values.map((entry, index) => {
             /**
@@ -217,8 +230,9 @@ function Viewer_providerless(){
                 // rank: entry["_type"] == "media" ? 3 : 2 
             }
             console.log(data)
-
-            let initiatorIndex = log.entries.findIndex(entry => entry["request"]?.url === initiators[index])
+            // Find initiator in list with .filter()
+            let initiator = entry["_initiator_harambe"]
+            let initiatorIndex = log.entries.findIndex(entry => entry?.request?.url == initiator)
             let initiatorID = initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
             layout.setNode(index.toString(), data)
             layout.setEdge(initiatorID, `${index}`)
@@ -251,7 +265,7 @@ function Viewer_providerless(){
 
     console.log(nodes)
 
-    if(selectedNode?.id && selectedNode.id ) nodes[Number(selectedNode.id)].selected = true;
+    if(selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined ) nodes[Number(selectedNode.id)].selected = true;
 
     /**
      * @type {import('reactflow').Edge[]}

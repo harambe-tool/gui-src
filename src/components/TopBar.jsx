@@ -36,7 +36,7 @@ function Filter({filterSetter}) {
 
   return (
     <div>
-      <div onClick={() => setShowMenu(false)} id="blurHandle" style={{position: "absolute", top:0,left:0,width:"100%",height:"100%",zIndex:1000, display: isShowingMenu ? "block" : "none"}}></div>
+      <div onClick={() => setShowMenu(false)} onWheel={() => setShowMenu(false)} id="blurHandle" style={{position: "absolute", top:0,left:0,width:"100%",height:"100vh",zIndex:1000, display: isShowingMenu ? "block" : "none"}}></div>
       <button id="filterButton" onClick={() => setShowMenu(!isShowingMenu)}>{dropdownMappings[filter]}</button>
       {
         isShowingMenu && <fieldset id="filters" tabindex="0" style={{zIndex:1001}}>
