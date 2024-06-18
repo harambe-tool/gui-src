@@ -21,7 +21,6 @@ function Filter({filterSetter}) {
 
   useEffect(()=>{
     console.log("filter changed")
-    instance.project({x: 0, y:0})
   }, [filter])
 
   let dropdownMappings = {
@@ -37,9 +36,10 @@ function Filter({filterSetter}) {
 
   return (
     <div>
-      <button id="filterButton" onClick={() => setShowMenu(!isShowingMenu)} onBlur={(ev) => {console.log(ev);if(ev.relatedTarget?.id != "filters")setShowMenu(false)}}>{dropdownMappings[filter]}</button>
+      <div onClick={() => setShowMenu(false)} id="blurHandle" style={{position: "absolute", top:0,left:0,width:"100%",height:"100%",zIndex:1000, display: isShowingMenu ? "block" : "none"}}></div>
+      <button id="filterButton" onClick={() => setShowMenu(!isShowingMenu)}>{dropdownMappings[filter]}</button>
       {
-        isShowingMenu && <fieldset id="filters" tabindex="0">
+        isShowingMenu && <fieldset id="filters" tabindex="0" style={{zIndex:1001}}>
         {Object.entries(dropdownMappings).map(([key, value], index) => (
           <button onClick={setAsFilter} key={key} className={key}>
   

@@ -102,7 +102,22 @@ function classifier(entry, index_any, internalPredicate){
     // return "harBase"
 }
 
+
 let decomposedPaths = []
+function buildDescendingPath(entry,index){
+    let url = new URL(entry.request.url)
+    let decomposedPath = (url.hostname+url.pathname).split("/")
+    console.log(decomposedPath)
+    
+    decomposedPath.map((slug,index,full)=>{
+        let fullPath = full.slice(0,index+1).join("/") //wait, actually why do i even slice it if its just == to full?
+        decomposedPaths.push({
+            id: decomposedPaths.length,
+            path: fullPath,
+            label: slug
+        })
+    })
+}
 
 let layout = new Dagre.graphlib.Graph()
 layout.setGraph({rankdir:"TB"});
@@ -124,9 +139,9 @@ function Viewer_providerless(){
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
     */
-   let [selectedNode, setSelectedNode] = useState(null);
-   let [filter, setFilter] = useState("all");
-    
+    let [selectedNode, setSelectedNode] = useState(null);
+    let [filter, setFilter] = useState("all");
+    let instance = useReactFlow()
     /**
      * @type {HARLog}
     */
@@ -171,28 +186,12 @@ function Viewer_providerless(){
     log.entries.map((entry, index)=>{
         classifier(entry,index, isInternal)
         if (entry["_type"] == "apiRequest_core"){
-            let url = new URL(entry.request.url)
-            // console.log(url.origin) 
-            let decomposedPath = (url.hostname+url.pathname).split("/")
-            console.log(decomposedPath)
-            
-            // let ending = decomposedPath.pop()
-            // define recursive function for building this tree based on the slugs
-            decomposedPath.map((slug,index,full)=>{
-                let fullPath = full.slice(0,index+1).join("/")
-                console.log(fullPath)
-                decomposedPaths.push({
-                    id: decomposedPaths.length,
-                    path: fullPath,
-                    label: slug
-                })
-            })
+            buildDescendingPath(entry, index)
             
             // decomposedPaths[fullPath][ending] = true
         }
     })
     console.log(decomposedPaths)
-    
     /**
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
@@ -242,7 +241,11 @@ function Viewer_providerless(){
 
         });
         edges = layout.edges()
+        setTimeout(()=>{
+            instance.fitView({duration:200,padding:.5})
+        },100)
         return {nodes,edges};
+
     }, [filter])
     // return { ...node, position: { x, y } };
 
@@ -259,7 +262,7 @@ function Viewer_providerless(){
     return <>
         <div className='viewer' style={{"width": "100vw", "height": "100vh"}}>
             <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
-            <ReactFlow selectNodesOnDrag={true} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
+            <ReactFlow  selectNodesOnDrag={true} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{maxZoom: 1000000, minZoom:0}} onNodeClick={(event,node)=>{setSelectedNode(node)}} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
