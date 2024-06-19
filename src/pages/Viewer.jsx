@@ -229,6 +229,7 @@ function Viewer_providerless() {
      */
     let { nodes, edges } = useMemo(() => {
 
+        let toplevel_parentID = 0;
         layout = new Dagre.graphlib.Graph()
         layout.setGraph({ rankdir: "TB" });
         layout.setDefaultEdgeLabel(() => ({}));
@@ -257,6 +258,9 @@ function Viewer_providerless() {
                     // If its a child, it cant be an orphan - but best to avoid a crash due to not thinking it out fully.
                     const parent = decomposedPaths.find((value)=>poppedPath==value.path)?.id ?? "orphan"
                     layout.setEdge(`${parent}-slug`, currentID)
+                }
+                else {
+                    toplevel_parentID = currentID; //doesnt matter which top level node, so we're fine with the last one.
                 }
 
                 return data;
@@ -322,8 +326,24 @@ function Viewer_providerless() {
             })
         });
         edges = layout.edges()
+
         setTimeout(() => {
-            instance.fitView({ duration: 200, padding: .5 })
+            if (filter == "apiRequest_core"){
+                console.log(toplevel_parentID, layout.nodes())
+                // let projectedCoords = instance.project({x,y})
+                // instance.setCenter(x, y)
+                const permaNodes = layout.nodes()
+                //My brain is foggy or something because how come layout.nodes() has "1-slug" but .find((val)=>val=="1-slug") returns undefined?
+                //I''ll take a short break and come back
+                console.log(layout.nodes(), toplevel_parentID, permaNodes.find((val)=>val==`${toplevel_parentID}-slug`))
+                let {x, y} = layout.node(`${toplevel_parentID}-slug`)
+                
+                instance.setViewport({x, y, zoom:5})
+                instance.fitView({ duration: 200, padding: .5 })
+            }
+            else {
+                instance.fitView({ duration: 200, padding: .5 })
+            }
         }, 100)
         return { nodes, edges };
 
