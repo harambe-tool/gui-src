@@ -229,7 +229,7 @@ function Viewer_providerless() {
      */
     let { nodes, edges } = useMemo(() => {
 
-        let toplevel_parentID = 0;
+        let toplevel_parentID = "";
         layout = new Dagre.graphlib.Graph()
         layout.setGraph({ rankdir: "TB" });
         layout.setDefaultEdgeLabel(() => ({}));
@@ -329,17 +329,12 @@ function Viewer_providerless() {
 
         setTimeout(() => {
             if (filter == "apiRequest_core"){
-                console.log(toplevel_parentID, layout.nodes())
                 // let projectedCoords = instance.project({x,y})
-                // instance.setCenter(x, y)
-                const permaNodes = layout.nodes()
-                //My brain is foggy or something because how come layout.nodes() has "1-slug" but .find((val)=>val=="1-slug") returns undefined?
-                //I''ll take a short break and come back
-                console.log(layout.nodes(), toplevel_parentID, permaNodes.find((val)=>val==`${toplevel_parentID}-slug`))
-                let {x, y} = layout.node(`${toplevel_parentID}-slug`)
+                // after logging i realize i have been using -slug-slug and toplevel_parentID is of the wrong type
+                let {x, y} = layout.node(toplevel_parentID)
                 
-                instance.setViewport({x, y, zoom:5})
-                instance.fitView({ duration: 200, padding: .5 })
+                instance.setCenter(x, y, {zoom:1, duration:200})
+                // instance.setViewport({x, y, zoom:2})
             }
             else {
                 instance.fitView({ duration: 200, padding: .5 })
