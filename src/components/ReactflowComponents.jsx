@@ -23,6 +23,9 @@ let customWidthMappings = {
   "apiRequest_core": {
       width:700,
   },
+  "api_path":{
+    height:175
+  },
   "default": {
     width:250,
     height:300
@@ -76,8 +79,12 @@ function HARCard(props) {
  */
 function ApiPath(props){
   return <>
-    <CardCore type={props.type} selected={props.selected}>
-      <span>{props.data.path}<br />{props.data.label}</span>
+    <CardCore type={props.type} selected={props.selected} className="api_path">
+        <b>Slug / Path Component</b>
+        <span>{props.data.label}</span>
+        <br></br>
+        <b>Full Path</b>
+        <span>{props.data.path}</span>
     </CardCore>
   </>
 }

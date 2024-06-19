@@ -8,6 +8,7 @@ import { APIBlock, AnalyticsBlock, ApiPath, HARBase, HARImage, customWidthMappin
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 import TopBar from '../components/TopBar';
+import { useNavigate } from 'react-router-dom';
 
 let initiators = {}
 let initiatorIndexes = [];
@@ -118,6 +119,7 @@ let decomposedPaths = []
 function buildDescendingPath(entry, index) {
     let url = new URL(entry.request.url)
     let decomposedPath = (url.hostname + url.pathname).split("/")
+    decomposedPath.pop()
     // console.log(decomposedPath)
 
     decomposedPath.map((slug, index, full) => {
@@ -150,6 +152,8 @@ const nodeTypes = {
 
 function Viewer_providerless() {
     let { harContent } = useContext(AppStateContext)
+
+    if (harContent == null)return location.replace("/")
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
     */
@@ -237,15 +241,24 @@ function Viewer_providerless() {
             console.log(filter, "Filtering by API request")
 
             extraNodes = decomposedPaths.map((pathObject) => {
+                let currentID = `${pathObject.id}-slug`
                 console.log(pathObject)
                 let data = {
-                    id: `${pathObject.id}-slug`,
+                    id: currentID,
                     type: "api_path",
                     data: pathObject,
                     focusable: false,
                     ...mapToDimension("api_path")
                 }
-                layout.setNode(`${pathObject.id}-slug`, data)
+                layout.setNode(currentID, data)
+                const isRoot = pathObject.label == pathObject.path
+                if (!isRoot){
+                    const poppedPath = pathObject.path.split("/").slice(0,-1).join("/")
+                    // If its a child, it cant be an orphan - but best to avoid a crash due to not thinking it out fully.
+                    const parent = decomposedPaths.find((value)=>poppedPath==value.path)?.id ?? "orphan"
+                    layout.setEdge(`${parent}-slug`, currentID)
+                }
+
                 return data;
             })
             console.log("Extra Nodes:", extraNodes)
@@ -271,8 +284,24 @@ function Viewer_providerless() {
 
             // Find initiator in list with .filter()
             // let initiator = entry["_initiator_harambe"]
-            let initiatorID = findInitiator(entry["_initiator_harambe"])
-            layout.setEdge(initiatorID, index_str)
+            if (filter == "apiRequest_core"){
+                let url = new URL(entry.request.url)
+                let simplePath = (url.hostname + url.pathname)
+
+                const poppedPath = simplePath.split("/").slice(0,-1).join("/")
+                console.log(poppedPath)
+                const searchResult = decomposedPaths.find((value)=>poppedPath==value.path)
+                console.log(poppedPath, "has a ", searchResult)
+                const parent = searchResult?.id ?? "orphan"
+                const edgeId = `${parent}-slug`
+                if (parent != "orphan")
+                    console.log(`${poppedPath} has a parent slug! `, edgeId, searchResult.path)
+                layout.setEdge(`${parent}-slug`, index_str)
+            }
+            else {
+                let initiatorID = findInitiator(entry["_initiator_harambe"])
+                layout.setEdge(initiatorID, index_str)
+            }
             return data
         })
         values = [...values, ...extraNodes]
@@ -301,7 +330,7 @@ function Viewer_providerless() {
     }, [filter])
     // return { ...node, position: { x, y } };
 
-    console.log(nodes)
+    console.log(edges)
 
     if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) nodes[Number(selectedNode.id)].selected = true;
 
