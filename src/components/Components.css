@@ -8,7 +8,7 @@
     height:300px;
     background:rgba(255,255,255,0.1);
     padding:10px;
-    border:2px solid rgba(134, 124, 255, 0);
+    border:2px solid rgba(134, 124, 255, 0.1);
 }
 
 .card.image {
@@ -38,8 +38,15 @@
 
 .card.api pre {
     background: #11192e;
-    padding: 5px;
+    padding: 6px;
+    border:1px solid white;
+    box-sizing: border-box;
     width: fit-content;
     min-width: calc(100% - 10px);
     border-radius: 12px;
+}
+
+.hljs-string {
+    color: rgb(200, 210, 252) !important;
+    text-shadow: 1px 1px #877cff9f;
 }

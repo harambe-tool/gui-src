@@ -44,6 +44,7 @@ function mapToDimension(type){
 function CardCore(props){
   // console.log(props)
   let dimensions = mapToDimension(props.type)
+
   return (
     <>
       <div className={`card ${props.className} ${props.selected ? "selected" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
@@ -60,7 +61,6 @@ function CardCore(props){
  * @param {import('reactflow').NodeProps<HAREntry>} props 
  */
 function HARCard(props) {
-  
   return (
     <>
     <CardCore type={props.type} selected={props.selected}>
@@ -68,6 +68,18 @@ function HARCard(props) {
     </CardCore>
     </>
   );
+}
+
+/**
+ * Use for requests of initiator type 'other'
+ * @param {import('reactflow').NodeProps<import('../pages/Viewer').decomposedPath_t>} props 
+ */
+function ApiPath(props){
+  return <>
+    <CardCore type={props.type} selected={props.selected}>
+      <span>{props.data.path}<br />{props.data.label}</span>
+    </CardCore>
+  </>
 }
 
 // function baseCardStyle(props){
@@ -188,4 +200,4 @@ function AnalyticsBlock(props){
   </CardCore>
 }
 
-export {HARCard as HARBase, HARImage, WebsocketBlock, AnalyticsBlock, APIBlock, customWidthMappings, mapToDimension}
+export {HARCard as HARBase, HARImage, WebsocketBlock, AnalyticsBlock, APIBlock, customWidthMappings, mapToDimension, ApiPath}

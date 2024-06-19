@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
 import 'reactflow/dist/style.css';
 // function component
-import {APIBlock, AnalyticsBlock, HARBase, HARImage, customWidthMappings, mapToDimension} from "./../components/ReactflowComponents"
+import {APIBlock, AnalyticsBlock, ApiPath, HARBase, HARImage, customWidthMappings, mapToDimension} from "./../components/ReactflowComponents"
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 import TopBar from '../components/TopBar';
@@ -84,7 +84,7 @@ function classifier(entry, index_any, internalPredicate){
             type = isInternal ? "hostedAsset" : "cdnAsset" 
     }
     if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")){
-       type = "media"
+        type = "media"
     }
     // console.log(entry.request.url)
     if (isAnalytics(entry.request.url)){
@@ -107,16 +107,25 @@ function classifier(entry, index_any, internalPredicate){
     };
 }
 
+/**
+ * @typedef {{id: number, path: string, label: string}} decomposedPath_t
+ */
 
+/**
+ * @type {decomposedPath_t[]}
+ */
 let decomposedPaths = []
 function buildDescendingPath(entry,index){
     let url = new URL(entry.request.url)
     let decomposedPath = (url.hostname+url.pathname).split("/")
-    console.log(decomposedPath)
+    // console.log(decomposedPath)
     
     decomposedPath.map((slug,index,full)=>{
-        let fullPath = full.slice(0,index+1).join("/") //wait, actually why do i even slice it if its just == to full?
-        decomposedPaths.push({
+        let fullPath = full.slice(0,index+1).join("/") //this is fine
+
+        // Prevent duplicate slug creations
+        let searchResults = decomposedPaths.findIndex((decomposed)=>decomposed.path == fullPath)
+        if (searchResults == -1)decomposedPaths.push({
             id: decomposedPaths.length,
             path: fullPath,
             label: slug
@@ -136,7 +145,7 @@ const nodeTypes = {
     "apiRequest_core": APIBlock,
     "cdnAsset": HARBase,
     "hostedAsset": HARBase,
-    "api_path": HARBase
+    "api_path": ApiPath
 };
 
 function Viewer_providerless(){
@@ -195,7 +204,8 @@ function Viewer_providerless(){
             let classified = classifier(entry,index, isInternal)
             entryClone["_type"] = classified.type
             entryClone["_initiator_harambe"] = classified.initiator
-            if (entry["_type"] == "apiRequest_core"){
+            if (entryClone["_type"] == "apiRequest_core"){
+                console.log("Building path from", entry.request.url)
                 buildDescendingPath(entry, index)
                 // decomposedPaths[fullPath][ending] = true
             }
@@ -203,7 +213,13 @@ function Viewer_providerless(){
             // console.log(entry)
         })
     }) 
-    console.log(decomposedPaths)
+    // console.log(decomposedPaths)
+
+
+    const findInitiator = (initiator)=>{
+        let initiatorIndex = log.entries.findIndex(entry => entry?.request?.url == initiator)
+        return initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
+    }
     /**
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
@@ -215,6 +231,26 @@ function Viewer_providerless(){
 
         let values = classifiedEntries;
         values = filter == "all" ? values : values.filter((entry)=>entry["_type"] == filter)
+        let extraNodes = []
+        
+        if (filter == "apiRequest_core"){
+            console.log(filter, "Filtering by API request")
+            
+            extraNodes = decomposedPaths.map((pathObject)=>{
+                console.log(pathObject)
+                let data = {
+                    id:`${pathObject.id}-slug`,
+                    type:"api_path",
+                    data: pathObject,
+                    focusable: false,
+                    ...mapToDimension("api_path")
+                }
+                layout.setNode(`${pathObject.id}-slug`, data)
+                return data;
+            })
+            console.log("Extra Nodes:", extraNodes)
+        }
+
         values = values.map((entry, index) => {
             /**
              * @type {import('reactflow').Node}
@@ -229,22 +265,27 @@ function Viewer_providerless(){
                 // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
                 // rank: entry["_type"] == "media" ? 3 : 2 
             }
-            console.log(data)
+            let index_str = index.toString()
+            layout.setNode(index_str, data)
+
+
             // Find initiator in list with .filter()
-            let initiator = entry["_initiator_harambe"]
-            let initiatorIndex = log.entries.findIndex(entry => entry?.request?.url == initiator)
-            let initiatorID = initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
-            layout.setNode(index.toString(), data)
-            layout.setEdge(initiatorID, `${index}`)
+            // let initiator = entry["_initiator_harambe"]
+            let initiatorID = findInitiator(entry["_initiator_harambe"])
+            layout.setEdge(initiatorID, index_str)
             return data
         })
+        values = [...values, ...extraNodes]
+
         Dagre.layout(layout);
         let nodes = []
         let edges = []
 
         // TODO: See if this whole memoized function can be optimized
         values.map((entry, index) => {
-            const { x, y, width, height } = layout.node(index.toString());
+            try {
+
+            const { x, y, width, height } = layout.node(entry.id); //i think i assigned an incorrect type to entry...
             nodes.push({
                 position: {
                     x: x - width / 2,
@@ -252,6 +293,11 @@ function Viewer_providerless(){
                 },
                 ...entry,
             })
+            } catch (e){
+                debugger;
+                throw e
+            }
+
 
         });
         edges = layout.edges()
