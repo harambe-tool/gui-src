@@ -88,6 +88,9 @@ export default function TopBar({selectedNode, filterSetter}){
     // let nodes = instance.getNodes()
     // let selectedNode = nodes.filter(node => node.selected)[0]
     console.log(selectedNode)
+    let isSlug = false
+    if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path"].includes(val))
+
     /**
      * @type {HAREntry}
      */
@@ -101,7 +104,7 @@ export default function TopBar({selectedNode, filterSetter}){
             <button tabIndex={3} disabled={!isActive}>Initiators</button>
         </div>
         <div className='center'>
-            {isActive && <span>{data.request.url}</span>}
+            {isActive && <span>{isSlug ? data.path : data.request.url}</span>}
             {!isActive && <span>Select a node to get started</span>}
         </div>
         <div className='right'>

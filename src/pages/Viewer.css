@@ -2,3 +2,16 @@
     height:100%;
     width:100%;
 }
+
+.barHolder {
+    display: flex;
+    position: absolute;
+    min-width: 100vw;
+    min-height:100vh;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.topbar, .detail-bar {
+    position:relative !important;
+}

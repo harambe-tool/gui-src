@@ -357,12 +357,15 @@ function Viewer_providerless() {
     // edges.
     return <>
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
-            <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
+            
+            <div className='barHolder'>
+                <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
+                <DetailBar log={selectedNode?.data}></DetailBar>
+            </div>
             <ReactFlow selectNodesOnDrag={true} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }} onNodeClick={(event, node) => { setSelectedNode(node) }} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
-            <DetailBar log={selectedNode?.data}></DetailBar>
         </div>
     </>
 }
