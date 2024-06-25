@@ -362,7 +362,7 @@ function Viewer_providerless() {
                 <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
             </div>
-            <ReactFlow selectNodesOnDrag={true} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }} onNodeClick={(event, node) => { setSelectedNode(node) }} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
+            <ReactFlow edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }} onNodeClick={(event, node) => { setSelectedNode(node) }} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
