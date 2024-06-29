@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import {AppStateContext} from "./../appStateBackend";
 import { useNavigate } from 'react-router-dom';
+import { MdSettings } from "react-icons/md";
 
 export default function Importer() {
   const ctx = useContext(AppStateContext);
@@ -66,6 +67,7 @@ export default function Importer() {
             { file && <button onClick={()=>handleUpload()} style={{ borderRadius: "5px", padding: "10px", border: "1px solid rgba(255, 255, 255, 0.2)", margin:"50px", background:"rgba(255, 255, 255, 0.05)", cursor: "pointer"}}>
               Get Started
             </button>}
+            <button onClick={()=>navigate('/settings')} className="settings-button"><MdSettings></MdSettings> <span>Settings</span></button>
         </div>
     </div>
     </>

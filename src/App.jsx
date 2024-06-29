@@ -3,6 +3,7 @@ import "./App.css";
 import Importer from "./pages/GettingStarted";
 import { AppStateProvider } from "./appStateBackend";
 import Viewer from "./pages/Viewer";
+import Settings from "./pages/Settings";
 // import { createContext, useContext, useState } from "react";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" index={true} element={<Importer />} />
             <Route exact path="/viewer" element={<Viewer />} />
+            <Route exact path="/settings" element={<Settings />} />
           </Routes>
         </HashRouter>
       </div>

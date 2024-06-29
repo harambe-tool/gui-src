@@ -123,3 +123,17 @@ button {
   background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
 }
+
+
+.settings-button {
+  position: absolute;
+  display: flex;
+  bottom: 2em;
+  right: 2em;
+  background: rgb(255 255 255 / 2%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  align-items: center;
+}
+.settings-button > * {
+  margin-inline:.5em;
+}
