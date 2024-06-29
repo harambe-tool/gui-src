@@ -153,7 +153,7 @@ const nodeTypes = {
 function Viewer_providerless() {
     let { harContent } = useContext(AppStateContext)
 
-    if (harContent == null)return location.replace("/")
+    if (harContent == null) return location.replace("/")
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
     */
@@ -253,10 +253,10 @@ function Viewer_providerless() {
                 }
                 layout.setNode(currentID, data)
                 const isRoot = pathObject.label == pathObject.path
-                if (!isRoot){
-                    const poppedPath = pathObject.path.split("/").slice(0,-1).join("/")
+                if (!isRoot) {
+                    const poppedPath = pathObject.path.split("/").slice(0, -1).join("/")
                     // If its a child, it cant be an orphan - but best to avoid a crash due to not thinking it out fully.
-                    const parent = decomposedPaths.find((value)=>poppedPath==value.path)?.id ?? "orphan"
+                    const parent = decomposedPaths.find((value) => poppedPath == value.path)?.id ?? "orphan"
                     layout.setEdge(`${parent}-slug`, currentID)
                 }
                 else {
@@ -288,13 +288,13 @@ function Viewer_providerless() {
 
             // Find initiator in list with .filter()
             // let initiator = entry["_initiator_harambe"]
-            if (filter == "apiRequest_core"){
+            if (filter == "apiRequest_core") {
                 let url = new URL(entry.request.url)
                 let simplePath = (url.hostname + url.pathname)
 
-                const poppedPath = simplePath.split("/").slice(0,-1).join("/")
+                const poppedPath = simplePath.split("/").slice(0, -1).join("/")
                 console.log(poppedPath)
-                const searchResult = decomposedPaths.find((value)=>poppedPath==value.path)
+                const searchResult = decomposedPaths.find((value) => poppedPath == value.path)
                 console.log(poppedPath, "has a ", searchResult)
                 const parent = searchResult?.id ?? "orphan"
                 const edgeId = `${parent}-slug`
@@ -328,12 +328,12 @@ function Viewer_providerless() {
         edges = layout.edges()
 
         setTimeout(() => {
-            if (filter == "apiRequest_core"){
+            if (filter == "apiRequest_core") {
                 // let projectedCoords = instance.project({x,y})
                 // after logging i realize i have been using -slug-slug and toplevel_parentID is of the wrong type
-                let {x, y} = layout.node(toplevel_parentID)
-                
-                instance.setCenter(x, y, {zoom:1, duration:200})
+                let { x, y } = layout.node(toplevel_parentID)
+
+                instance.setCenter(x, y, { zoom: 1, duration: 200 })
                 // instance.setViewport({x, y, zoom:2})
             }
             else {
@@ -357,12 +357,25 @@ function Viewer_providerless() {
     // edges.
     return <>
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
-            
+
             <div className='barHolder'>
                 <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
             </div>
-            <ReactFlow edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false} minZoom={0} maxZoom={1000000} pannable={true} fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }} onNodeClick={(event, node) => { setSelectedNode(node) }} nodesFocusable={true} nodeTypes={nodeTypes} proOptions={{ hideAttribution: true }} edges={customEdges} nodes={nodes} fitView>
+            <ReactFlow
+                edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false}
+                minZoom={0} maxZoom={1000000} pannable={true}
+                fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }}
+                onNodeClick={(event, node) => { setSelectedNode(node) }}
+                nodesFocusable={true} nodeTypes={nodeTypes}
+                proOptions={{ hideAttribution: true }}
+                edges={customEdges}
+                nodes={nodes}
+                onlyRenderVisibleElements={true}
+                connectOnClick={false}
+                defaultEdgeOptions={{ focusable: false, deletable: false, updatable: false }}
+                nodesConnectable={false}
+                fitView>
                 <Background />
                 <Controls />
             </ReactFlow>
