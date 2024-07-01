@@ -4,6 +4,7 @@ import Importer from "./pages/GettingStarted";
 import { AppStateProvider } from "./appStateBackend";
 import Viewer from "./pages/Viewer";
 import Settings from "./pages/Settings";
+import DynamicStylesheet from "./components/DynamicStylesheet";
 // import { createContext, useContext, useState } from "react";
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   return (
     <AppStateProvider>
       <div style={{ minHeight: "100vh", minWidth: "100vw" }}>
+        <DynamicStylesheet></DynamicStylesheet>
         <HashRouter>
           <Routes>
             <Route path="/" index={true} element={<Importer />} />

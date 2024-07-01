@@ -5,8 +5,8 @@
     z-index: 100;
     padding: 20px;
     box-sizing: border-box;
-    background: #050a16;
-    border-bottom: 2px solid white;
+    background: var(--background);
+    border-bottom: 2px solid  var(--outline);
     justify-content: space-between;
 
     align-items: center;

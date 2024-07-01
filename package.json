@@ -14,6 +14,7 @@
     "@material/material-color-utilities": "^0.3.0",
     "highlight.js": "^11.9.0",
     "react": "^18.2.0",
+    "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-file-utils": "^1.2.0",
     "react-graph-vis": "^1.0.7",

@@ -1,25 +1,85 @@
 :root {
+  --primaryPaletteKeyColor: #6f65e7;
+  --secondaryPaletteKeyColor: #7571a5;
+  --tertiaryPaletteKeyColor: #c27f00;
+  --neutralPaletteKeyColor: #787680;
+  --neutralVariantPaletteKeyColor: #787585;
+  --background: #13131a;
+  --onBackground: #e5e1ec;
+  --surface: #13131a;
+  --surfaceDim: #13131a;
+  --surfaceBright: #393841;
+  --surfaceContainerLowest: #0e0d15;
+  --surfaceContainerLow: #1c1b23;
+  --surfaceContainer: #201f27;
+  --surfaceContainerHigh: #2a2931;
+  --surfaceContainerHighest: #35343c;
+  --onSurface: #e5e1ec;
+  --surfaceVariant: #474554;
+  --onSurfaceVariant: #c8c4d6;
+  --inverseSurface: #e5e1ec;
+  --inverseOnSurface: #312f38;
+  --outline: #928f9f;
+  --outlineVariant: #474554;
+  --shadow: #000000;
+  --scrim: #000000;
+  --surfaceTint: #c5c0ff;
+  --primary: #c5c0ff;
+  --onPrimary: #25059e;
+  --primaryContainer: #8a80ff;
+  --onPrimaryContainer: #1d0086;
+  --inversePrimary: #564acc;
+  --secondary: #c5c0fa;
+  --onSecondary: #2e2a5a;
+  --secondaryContainer: #444172;
+  --onSecondaryContainer: #b4afe7;
+  --tertiary: #ffb956;
+  --onTertiary: #452b00;
+  --tertiaryContainer: #c68206;
+  --onTertiaryContainer: #382200;
+  --error: #ffb4ab;
+  --onError: #690005;
+  --errorContainer: #93000a;
+  --onErrorContainer: #ffdad6;
+  --primaryFixed: #e3dfff;
+  --primaryFixedDim: #c5c0ff;
+  --onPrimaryFixed: #140067;
+  --onPrimaryFixedVariant: #3e2eb3;
+  --secondaryFixed: #e3dfff;
+  --secondaryFixedDim: #c5c0fa;
+  --onSecondaryFixed: #191444;
+  --onSecondaryFixedVariant: #444172;
+  --tertiaryFixed: #ffddb5;
+  --tertiaryFixedDim: #ffb956;
+  --onTertiaryFixed: #2a1800;
+  --onTertiaryFixedVariant: #633f00
+}
+
+
+:root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--onBackground);
+  background: var(--background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
 }
 #root {
   min-height:100vh;
 }
 body {
   margin: 0;
-  color: #ffffff !important;
-  background-color: #010613;
-  -webkit-box-shadow: inset 1px 1px 20px -9px #867cff;
-  box-shadow: inset 1px 1px 20px -9px #867cff;
+  color: var(--onBackground) !important;
+  background-color: var(--background);
+  -webkit-box-shadow: inset 1px 1px 20px -9px var(--primaryPaletteKeyColor);
+  box-shadow: inset 1px 1px 20px -9px var(--primaryPaletteKeyColor);
   min-height: 100vh;
 }
 
@@ -28,7 +88,7 @@ h1 {
   line-height: 1.1;
 }
 
-@media (prefers-color-scheme: light) {
+/* @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
@@ -39,7 +99,7 @@ h1 {
   button {
     background-color: #f9f9f9;
   }
-}
+} */
 
 
 * {
@@ -50,7 +110,7 @@ h1 {
 }
 
 #topGlow {
-  box-shadow: 0px -6px 60px 13px #867cff;
+  box-shadow: 0px -6px 60px 13px var(--primaryPaletteKeyColor);
 }
 
 h1, h2 {
@@ -62,16 +122,16 @@ h1, h2 {
   width: 40vw;
   margin-inline: 30vw;
   border-radius: 3px;
-  box-shadow: 0px -1px 20px 3px #867cff;
-  background-color: white;
+  box-shadow: 0px -1px 20px 3px var(--primaryPaletteKeyColor);
+  background-color: #b4afe7;
 }
 
 p b, a, h1 b, span b {
-  text-shadow: 2px 2px #867cff;
+  text-shadow: 2px 2px var(--primaryPaletteKeyColor);
 }
 
 .sep .darkmode {
-  border-top: 2px solid white;
+  border-top: 2px solid var(--onBackground);
 }
 
 /* code {
@@ -105,7 +165,7 @@ code {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #9d94ff;
+  background-color:  var(--primaryPaletteKeyColor);
   border-radius: 100px;
   overflow: hidden;
 
@@ -118,7 +178,8 @@ code {
 button { 
   border-radius: 5px;
   padding: 10px;
-  border:  1px solid rgba(255, 255, 255, 0.2);
+  border:  1px solid var(--outline);
+  color: var(--onBackground);
   /* margin: 50px; */
   background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
@@ -131,9 +192,17 @@ button {
   bottom: 2em;
   right: 2em;
   background: rgb(255 255 255 / 2%);
-  border: 1px solid rgb(255 255 255 / 10%);
+  /* border: 1px solid rgb(255 255 255 / 10%); */
   align-items: center;
 }
+
+
 .settings-button > * {
   margin-inline:.5em;
+}
+
+.colorDisplay {
+  width:3em;
+  height:3em;
+  border-radius: 5px;
 }

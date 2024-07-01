@@ -4,13 +4,13 @@
   flex-direction: row;
 }
 a {
-  color: white;
+  color: var(--onBackground);
   text-shadow: 2px 2px blue;
   text-decoration: none;
   background: #9d94ff;
   padding: 2px;
   border-radius: 6px;
-  box-shadow: inset 0px 0px 6px 3px #726fc1;
+  box-shadow: inset 0px 0px 6px 3px var(--primaryPaletteKeyColor);
 }
 
 
@@ -34,10 +34,10 @@ ul {
 
 li::before {
   content: '\2022';
-  color: azure;
+  /* color: azure; */
   padding: 10px;
   margin-left: -25px;
-  text-shadow: 0px 0px 4px #867cff, 1px 0px 4px #867cff,-1px 0px 4px #867cff,0px 1px 4px #867cff,0px -1px 4px #867cff;
+  text-shadow: 0px 0px 4px  var(--primaryPaletteKeyColor), 1px 0px 4px  var(--primaryPaletteKeyColor),-1px 0px 4px  var(--primaryPaletteKeyColor),0px 1px 4px  var(--primaryPaletteKeyColor),0px -1px 4px  var(--primaryPaletteKeyColor);
 }
 
 button {
