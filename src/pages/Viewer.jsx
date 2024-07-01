@@ -12,7 +12,23 @@ import { useNavigate } from 'react-router-dom';
 
 let initiators = {}
 let initiatorIndexes = [];
-
+/**
+ * Type the Data object.
+ * @typedef {{
+*     amz: boolean,
+*     form: boolean,
+*     csrf: boolean,
+*     ratelimit: boolean,
+*     requestid: boolean,
+*     correlationid: boolean,
+*     apikey: boolean,
+*     accesstoken: boolean,
+*     authtoken: boolean,
+*     authorization: boolean,
+*     clientid: boolean,
+*     userid: boolean,
+* }} Data
+*/
 
 const trackers = [
     "https://www.google-analytics.com/g/collect",
@@ -38,6 +54,13 @@ function isAnalytics(url) {
  * @param {string} pageref 
  */
 function classifier(entry, index_any, internalPredicate) {
+
+
+   
+    /**
+     * @type {Data}
+     */
+    let data = {};
     let type = "harBase"
     // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
     const initiator = entry["_initiator"]
@@ -68,14 +91,57 @@ function classifier(entry, index_any, internalPredicate) {
     let coreURL = new URL(entry.request.url).hostname.split(".");
     let isInternal = internalPredicate(coreURL)
 
-    //todo: create `type` for reactflow
-    //  analytics_endpoint (posthog, google ads, etc)
-    //  apiRequest_external (identify endpoints through CLD similarity. with an option to change to internal API)
-    //  apiRequest_core (what the site identifies as the main API - identify endpoints through CLD similarity with an option to change to external API)
-    //  harBase (initiator : other)
-    //  hostedAsset (static hosted scripts - all scripts under same CLD or not recognized from a global provider. Can get from long cache times or file extension)
-    //  cdnAsset (3rd party scripts)
-    //  media (images, svg, icons, fonts, etc)
+    //TODO: Implement https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html (and credit it)
+    const classificationMap = {
+        "amz": entry.response?.headers?.includes("x-amz-request-id"),
+        "form": entry.request?.postData?.mimeType?.startsWith("application/x-www-form-urlencoded"),
+        "csrf": entry.response?.headers?.includes("x-csrf-token"),
+        "ratelimit": entry.response?.headers?.includes("x-ratelimit-limit"),
+        "requestid": entry.request?.headers?.includes("x-request-id"),
+        "correlationid": entry.request?.headers?.includes("x-correlation-id"),
+        "apikey": entry.request?.headers?.includes("x-api-key"),
+
+    }
+    // Object.entries
+    // }
+    // if (entry.response.headers.includes("x-amz-request-id")){
+    //     data["amz"] = true // Uses AWS
+    // }
+    // if (entry.request.method == "POST" && entry.request.postData.mimeType == "application/x-www-form-urlencoded") {
+    //     data["form"] = true // Uses forms
+    // }
+    // if (entry.request.headers.includes("x-csrf-token")) {
+    //     data["csrf"] = true // Uses CSRF
+    // }
+    // if (entry.response.headers.includes("x-ratelimit-limit")) {
+    //     data["ratelimit"] = true // Uses rate limiting
+    // }
+    // if (entry.response.headers.includes("x-request-id")) {
+    //     data["requestid"] = true // Uses request IDs
+    // }
+    // if (entry.response.headers.includes("x-correlation-id")) {
+    //     data["correlationid"] = true // Will be useful ofr tracking requests in Harambe - TODO!
+    // }
+    // if (entry.response.headers.includes("x-api-key")) {
+    //     data["apikey"] = true // Might be useful
+    // }
+    // if (entry.response.headers.includes("x-access-token")) {
+    //     data["accesstoken"] = true // Could contain useful JWTs?
+    // }
+    // if (entry.response.headers.includes("x-auth-token")) {
+    //     data["authtoken"] = true // Uses auth tokens
+    // }
+    // if (entry.response.headers.includes("authorization")) {
+    //     data["authorization"] = true // Uses authorization headers
+    // }
+    // if (entry.response.headers.includes("x-client-id")) {
+    //     data["clientid"] = true // Uses client IDs
+    // }
+    // if (entry.response.headers.includes("x-user-id")) {
+    //     data["userid"] = true // Uses user IDs
+    // }
+
+
     type = "harBase"
     switch (entry["_resourceType"]) {
         case "image":
@@ -104,7 +170,8 @@ function classifier(entry, index_any, internalPredicate) {
     // return "harBase"
     return {
         type,
-        initiator: initiatorURL
+        initiator: initiatorURL,
+        data
     };
 }
 
@@ -115,7 +182,7 @@ function classifier(entry, index_any, internalPredicate) {
 /**
  * @type {decomposedPath_t[]}
  */
-let decomposedPaths = []
+export let decomposedPaths = []
 function buildDescendingPath(entry, index) {
     let url = new URL(entry.request.url)
     let decomposedPath = (url.hostname + url.pathname).split("/")
@@ -207,6 +274,7 @@ function Viewer_providerless() {
             let entryClone = { ...entry }
             let classified = classifier(entry, index, isInternal)
             entryClone["_type"] = classified.type
+            entryClone["_data"] = classified.data
             entryClone["_initiator_harambe"] = classified.initiator
             if (entryClone["_type"] == "apiRequest_core") {
                 console.log("Building path from", entry.request.url)

@@ -1,0 +1,91 @@
+{
+    "mapper":{
+        "response":{
+            "_include": {
+                "cf-ray": "cloudflare",
+                "x-cache": "fastly",
+                "x-cloud-trace-context": "google",
+                "x-heroku-queue-wait-time": "heroku",
+                "x-rackspace-request-id": "rackspace",
+                "x-traefik-version": "traefik",
+                "x-envoy-upstream-service-time": "envoy",
+                "x-haproxy-backend": "haproxy",
+                "x-google-backends": "google-lb",
+                "x-ratelimit-limit": "ratelimit"
+                
+            },
+            "x-powered-by":{
+                "nginx": "nginx",
+                "apache": "apache",
+                "iis": "iis",
+                "openresty": "openresty",
+                "traefik": "traefik",
+                "caddy": "caddy",
+                "envoy": "envoy"
+            }
+        },
+        "request":{
+            "_include":{
+                "x-amz-request-id": "amz",
+                "x-ms-request-id": "azure",
+                "x-amzn-trace-id": "aws-elb",
+                "authorization": "authorization",
+                "x-api-key": "apikey",
+                "api-key": "apikey",
+                "apikey": "apikey",
+                "x-client-id": "clientid",
+                "client-id": "clientid",
+                "clientid": "clientid",
+                "x-user-id": "userid",
+                "user-id": "userid",
+                "userid": "userid"
+            }
+        }
+    },
+    "descriptions":{
+        "amz": "This node uses Amazon Web Services.",
+        "cloudflare": "This node is behind Cloudflare.",
+        "fastly": "This node is behind Fastly.",
+        "google": "This node likely uses Google Cloud Platform.",
+        "heroku": "This node is hosted on Heroku.",
+        "rackspace": "This node likely uses Rackspace services.",
+        "azure": "This node is hosted on Microsoft Azure.",
+        "nginx": "This node uses Nginx.",
+        "apache": "This node uses Apache.",
+        "iis": "This node uses Internet Information Services.",
+        "openresty": "This node uses OpenResty.",
+        "traefik": "This node uses Traefik as a reverse proxy/load balancer.",
+        "caddy": "This node uses Caddy as a web server.",
+        "envoy": "This node uses Envoy as a proxy.",
+        "haproxy": "This node uses HAProxy as a load balancer.",
+        "aws-elb": "This node uses Amazon Web Services Elastic Load Balancer.",
+        "google-lb": "This node uses Google Cloud Load Balancing.",
+        "ratelimit": "This node implements rate limiting.",
+        "set-cookie": "The response sets a cookie.",
+        "server-timing": "The response includes server timing information.",
+        "strict-transport-security": "This node enforces HTTPS connections.",
+        "x-xss-protection": "This node enables cross-site scripting (XSS) protection.",
+        "x-frame-options": "This node controls if it can be embedded in frames.",
+        "content-security-policy": "This node defines content security policies.",
+        "x-content-type-options": "This node prevents MIME sniffing vulnerabilities.",
+        "referrer-policy": "This node defines how referrers are sent.",
+        "access-control-allow-origin": "This node defines which origins are allowed to access resources.",
+        "access-control-allow-methods": "This node defines which HTTP methods are allowed.",
+        "access-control-allow-headers": "This node defines which custom headers are allowed.",
+        "x-powered-by": "The response discloses the underlying technology used in the x-powered-by header.",
+        "accept": "The request specifies acceptable media types.",
+        "accept-encoding": "The request specifies acceptable content encodings.",
+        "accept-language": "The request specifies preferred languages.",
+        "authorization": "The request includes authorization information.",
+        "cookie": "The request includes cookies.",
+        "x-api-key": "The request includes an API key.",
+        "x-client-id": "The request includes a client ID.",
+        "x-user-id": "The request includes a user ID.",
+        "api-key": "The request includes an API key.",
+        "client-id": "The request includes a client ID.",
+        "user-id": "The request includes a user ID.",
+        "apikey": "The request includes an API key.",
+        "clientid": "The request includes a client ID.",
+        "userid": "The request includes a user ID."
+    }
+}
