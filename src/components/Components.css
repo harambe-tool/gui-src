@@ -8,7 +8,7 @@
     height:300px;
     background:rgba(255,255,255,0.1);
     padding:10px;
-    border:2px solid rgba(134, 124, 255, 0.1);
+    /* border:2px solid rgba(134, 124, 255, 0.1); */
 }
 
 .card.image {
@@ -17,7 +17,7 @@
 
 .card.selected {
     background:rgba(255,255,255,0.2);
-    border:2px solid rgba(134, 124, 255, 1);
+    border:2px solid var(--primary);
 }
 
 .card.analytics {
@@ -37,7 +37,7 @@
 }
 
 .card.api pre {
-    background: #11192e;
+    background: var(--surfaceContainerLowest);
     padding: 6px;
     border:1px solid white;
     box-sizing: border-box;
@@ -47,17 +47,20 @@
 }
 
 .hljs-string {
-    color: rgb(200, 210, 252) !important;
-    text-shadow: 1px 1px #877cff9f;
+    color: var(--primaryFixedDim) !important;
+    text-shadow: 1px 1px var(--inversePrimary);
+}
+.hljs-attr {
+    color: var(--inversePrimary) !important;
 }
 
 .card.api_path {
-    border:1px solid #877cffc7;
+    border:1px solid var(--inversePrimary);
     display:flex;
     flex-direction: column;
 }
 
 .card.api_path b {
-    text-shadow: 1px 1px #877cff9f;
+    text-shadow: 1px 1px var(--inversePrimary);
     font-size:1.1em;
 }

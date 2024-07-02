@@ -78,8 +78,8 @@ body {
   margin: 0;
   color: var(--onBackground) !important;
   background-color: var(--background);
-  -webkit-box-shadow: inset 1px 1px 20px -9px var(--primaryPaletteKeyColor);
-  box-shadow: inset 1px 1px 20px -9px var(--primaryPaletteKeyColor);
+  /* -webkit-box-shadow: inset 0 0 20px -12px var(--primaryPaletteKeyColor); */
+  box-shadow:inset 0 0 100px -60px var(--primaryPaletteKeyColor);
   min-height: 100vh;
 }
 
@@ -122,11 +122,13 @@ h1, h2 {
   width: 40vw;
   margin-inline: 30vw;
   border-radius: 3px;
-  box-shadow: 0px -1px 20px 3px var(--primaryPaletteKeyColor);
-  background-color: #b4afe7;
+  box-shadow: 2px 2px 0px 0 var(--primaryPaletteKeyColor),0px 0px 2px 0 var(--primaryPaletteKeyColor);
+  background-color: #fff;
 }
 
 p b, a, h1 b, span b {
+  /* This is actually done in DynamicStylesheet! */
+  color: var(--onSurfaceVariant);
   text-shadow: 2px 2px var(--primaryPaletteKeyColor);
 }
 
@@ -159,13 +161,13 @@ code {
 }
 
 *::-webkit-scrollbar-track {
-  background: #2626265c;
+  background: #2626261f;
   overflow: hidden;
   border-radius: 100px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color:  var(--primaryPaletteKeyColor);
+  background-color:  var(--primaryFixedDim);
   border-radius: 100px;
   overflow: hidden;
 
@@ -189,7 +191,7 @@ button {
 .settings-button {
   position: absolute;
   display: flex;
-  bottom: 2em;
+  top: 2em;
   right: 2em;
   background: rgb(255 255 255 / 2%);
   /* border: 1px solid rgb(255 255 255 / 10%); */

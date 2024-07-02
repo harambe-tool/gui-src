@@ -42,9 +42,7 @@
     flex-direction:column;
     padding:1em;
     border-radius:12px; 
-    background:#050a16;
-    position:absolute;
-    top: anchor(--buss);
+    background:var(--background);
 }
 #filters > button {
     display:flex;
@@ -59,10 +57,13 @@
 }
 
 #filters > button:hover {
-    background:rgba(8, 0, 19, 0.9);
+    background:var(--surfaceContainer);
     transition:100ms cubic-bezier(0.455, 0.03, 0.515, 0.955) all;
 }
 
+input[type="radio"]:checked {
+    background:var(--surfaceContainer)
+}
 
 #filterButton {
     width:20em;

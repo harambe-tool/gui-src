@@ -28,14 +28,16 @@
 .detail-bar {
     overflow: hidden;
     overflow-y: scroll;
-    background:rgba(0, 0, 0, .2);
+    background: rgba(0, 0, 0, .2);
+    /* background changes in DynamicStylesheet */
     backdrop-filter: blur(10px);
-    border:2px solid white;
-    box-shadow:0 0 9px 1px rgb(134 124 255);
-    height:70vh;
-    padding:2em;
-    width:100%;
-    border-radius: 12px 0 0 12px;
+    border: 2px solid white;
+    box-shadow: inset 0 0 9px 1px var(--primaryFixed);
+    height: 70vh;
+    padding: 2em;
+    margin-right: 1em;
+    width: 100%;
+    border-radius: 18px;
 }
 
 .detail-bar span {
@@ -57,12 +59,12 @@
 
 .subheader, b {
     font-weight: bold;
-    text-shadow: 1px 1px #867cff
+    text-shadow: 1px 1px var(--primary)
 }
 
 .sep.small {
     width: 91%;
     margin: 12px;
     margin-inline: auto;
-    box-shadow: 0px -1px 20px 0px #867cff
+    /* box-shadow: 0px -1px 20px 0px var(--primary) */
 }
