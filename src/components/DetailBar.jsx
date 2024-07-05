@@ -2,6 +2,7 @@
 import "./DetailBar.css"
 import "./../pages/HARTypes"
 import { decomposedPaths } from "../pages/Viewer"
+import { details } from "../utils/classifiers"
 
 function subBuilder(index,subheader,content){
     return <>
@@ -126,6 +127,9 @@ function DetailBar_core({log}){
      * @type {import("../pages/Viewer").Data}
      */
     const data = log["_data"]
+
+    console.log(data)
+
     return <div className="detail-bar-container">
         <div className="detail-bar">
             <span className="subheader">Inspecting the following node</span>
@@ -137,7 +141,9 @@ function DetailBar_core({log}){
 
             <div className="sep small"></div>
             <span className="header">Extracted data</span>
-
+            {
+                data.map((technology_name, index)=><span>{details[technology_name]}</span>)
+            }
             {/* <div className="headers">
                 <div className="req section">
                     <span className="header">Request Headers</span>

@@ -9,26 +9,10 @@ import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 import TopBar from '../components/TopBar';
 import { useNavigate } from 'react-router-dom';
+import fingerprintClassifier from '../utils/classifiers';
 
 let initiators = {}
 let initiatorIndexes = [];
-/**
- * Type the Data object.
- * @typedef {{
-*     amz: boolean,
-*     form: boolean,
-*     csrf: boolean,
-*     ratelimit: boolean,
-*     requestid: boolean,
-*     correlationid: boolean,
-*     apikey: boolean,
-*     accesstoken: boolean,
-*     authtoken: boolean,
-*     authorization: boolean,
-*     clientid: boolean,
-*     userid: boolean,
-* }} Data
-*/
 
 const trackers = [
     "https://www.google-analytics.com/g/collect",
@@ -55,12 +39,7 @@ function isAnalytics(url) {
  */
 function classifier(entry, index_any, internalPredicate) {
 
-
-   
-    /**
-     * @type {Data}
-     */
-    let data = {};
+    let data = [];
     let type = "harBase"
     // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
     const initiator = entry["_initiator"]
@@ -102,6 +81,9 @@ function classifier(entry, index_any, internalPredicate) {
         "apikey": entry.request?.headers?.includes("x-api-key"),
 
     }
+
+    let dataToBeProcessed = fingerprintClassifier(entry.request.headers, entry.response.headers)
+    // console.log(dataToBeProcessed)
     // Object.entries
     // }
     // if (entry.response.headers.includes("x-amz-request-id")){
@@ -171,7 +153,7 @@ function classifier(entry, index_any, internalPredicate) {
     return {
         type,
         initiator: initiatorURL,
-        data
+        data:dataToBeProcessed
     };
 }
 
@@ -284,7 +266,7 @@ function Viewer_providerless() {
             return entryClone
             // console.log(entry)
         })
-    })
+    },[])
     // console.log(decomposedPaths)
 
 

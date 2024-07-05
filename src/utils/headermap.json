@@ -11,7 +11,8 @@
                 "x-envoy-upstream-service-time": "envoy",
                 "x-haproxy-backend": "haproxy",
                 "x-google-backends": "google-lb",
-                "x-ratelimit-limit": "ratelimit"
+                "x-ratelimit-limit": "ratelimit",
+                "x-amz-cf-id": "aws-elb"
                 
             },
             "x-powered-by":{
@@ -22,6 +23,9 @@
                 "traefik": "traefik",
                 "caddy": "caddy",
                 "envoy": "envoy"
+            },
+            "server":{
+                "nginx": "nginx"
             }
         },
         "request":{
@@ -38,12 +42,14 @@
                 "clientid": "clientid",
                 "x-user-id": "userid",
                 "user-id": "userid",
-                "userid": "userid"
+                "userid": "userid",
+                "sentry-trace":"sentry"
             }
         }
     },
     "descriptions":{
         "amz": "This node uses Amazon Web Services.",
+        "sentry": "This node uses Sentry.",
         "cloudflare": "This node is behind Cloudflare.",
         "fastly": "This node is behind Fastly.",
         "google": "This node likely uses Google Cloud Platform.",

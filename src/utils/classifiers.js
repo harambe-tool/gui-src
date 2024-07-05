@@ -1,3 +1,4 @@
+let headermapper = (await import("./headermap.json"))
 // WARNING : These checks are AI Generated.
 // TODO: Implement https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html (and credit it)
 // TODO: Get less AI Generated header checks by surveying bug hunters on common "ooh la la" headers
@@ -5,26 +6,54 @@
 // "Why wasn't this already the case?" -> as I mainly do bug bounties on big tech companies, I mostly deal with vendor-specific headers.
 // more:  well, x-goog-api-key, ezpz, no big deal - x-trace-something-for-obscure-server, i hardly know 'er
 
-let headermapper = (await import("./headermap.json"))
 
+const includeChecks_resp = Object.assign({}, headermapper.mapper.response._include)
+const includeChecks_req = Object.assign({},headermapper.mapper.request._include)
+
+let reqMappings = headermapper.mapper.request
+let respMappings = headermapper.mapper.response
+delete reqMappings["_include"]
+delete respMappings["_include"]
 
 export default function fingerprintClassifier(requestHeaders, responseHeaders){
-    const includeChecks_resp = headermapper.response._include
-    const includeChecks_req = headermapper.request._include
-
-
-    reqIncludes = Object.keys(includeChecks_resp)
+    // let reqIncludes = Object.keys(includeChecks_resp)
     
-    const includeLambda = (headers, includeCheck)=>Object.keys(headers).reduce((accumulated, headername, index, array)=>{
-        let extractedDetailKey = includeCheck[headername]
-        if(headers.includes(headername)){
-            return [...accumulated, extractedDetailKey]
-        }
-    }, [])
+    function includeChecker(headers, includeMap){
+        let keysOfInclude = Object.keys(includeMap)
+        let filtered = headers.filter((header)=>keysOfInclude.includes(header.name.toLowerCase()))
+        return filtered.map((header)=>includeMap[header.name])
+    }
+    function valuechecker(headers, comparisonMap){
+        let keysOfInclude = Object.keys(comparisonMap)
+        // let foundHeader = headers.find((header)=>keysOfInclude.includes(header.name.toLowerCase()))
+        // foundHeader.value
+        let filtered = headers.filter((header)=>keysOfInclude.includes(header.name.toLowerCase()))
+        let mapped = filtered.map((header)=>comparisonMap[header.name.toLowerCase()][header.value.toLowerCase()]) 
+        
+        return mapped
+        // return filtered.map((header)=>comparisonMap[header.name])
+    }
+    // const comparisonMapper = (headers, mappings)=>Object.keys(headers).reduce((accumulated, headername, index, array)=>{
+    //     let extractedDetailKey = mappings[headername]
+        
+    //     if(headers.includes(headername)){
+    //         return [...accumulated, extractedDetailKey]
+    //     }
+    // }, [])
 
-    let nodeInfo  = includeLambda(requestHeaders, includeChecks_req)
-    nodeInfo = [...nodeInfo, ...includeLambda(responseHeaders, includeChecks_resp)]
-    
+
+    let nodeInfo  = [
+        ...includeChecker(requestHeaders, includeChecks_req),
+        ...includeChecker(responseHeaders, includeChecks_resp),
+        ...valuechecker(requestHeaders, reqMappings),
+        ...valuechecker(responseHeaders, respMappings)
+    ]
+    // nodeInfo = [...nodeInfo, ...includeChecker(responseHeaders, includeChecks_resp), ...]
+
+    // Deduplicating...
+    nodeInfo = [...new Set(nodeInfo)].filter((val) => val !== undefined)
+    // console.log(nodeInfo)
+    return nodeInfo
     // const data = {
     //     // "amz": responseHeaders.includes("x-amz-request-id"),
     //     // "cloudflare": responseHeaders.includes("cf-ray"),
@@ -75,50 +104,4 @@ export default function fingerprintClassifier(requestHeaders, responseHeaders){
 
 }
   
-export const details = {
-    "amz": "This node uses Amazon Web Services.",
-    "cloudflare": "This node is behind Cloudflare.",
-    "fastly": "This node is behind Fastly.",
-    "google": "This node likely uses Google Cloud Platform.",
-    "heroku": "This node is hosted on Heroku.",
-    "rackspace": "This node likely uses Rackspace services.",
-    "azure": "This node is hosted on Microsoft Azure.",
-    "nginx": "This node uses Nginx.",
-    "apache": "This node uses Apache.",
-    "iis": "This node uses Internet Information Services.",
-    "openresty": "This node uses OpenResty.",
-    "traefik": "This node uses Traefik as a reverse proxy/load balancer.",
-    "caddy": "This node uses Caddy as a web server.",
-    "envoy": "This node uses Envoy as a proxy.",
-    "haproxy": "This node uses HAProxy as a load balancer.",
-    "aws-elb": "This node uses Amazon Web Services Elastic Load Balancer.",
-    "google-lb": "This node uses Google Cloud Load Balancing.",
-    "ratelimit": "This node implements rate limiting.",
-    "set-cookie": "The response sets a cookie.",
-    "server-timing": "The response includes server timing information.",
-    "strict-transport-security": "This node enforces HTTPS connections.",
-    "x-xss-protection": "This node enables cross-site scripting (XSS) protection.",
-    "x-frame-options": "This node controls if it can be embedded in frames.",
-    "content-security-policy": "This node defines content security policies.",
-    "x-content-type-options": "This node prevents MIME sniffing vulnerabilities.",
-    "referrer-policy": "This node defines how referrers are sent.",
-    "access-control-allow-origin": "This node defines which origins are allowed to access resources.",
-    "access-control-allow-methods": "This node defines which HTTP methods are allowed.",
-    "access-control-allow-headers": "This node defines which custom headers are allowed.",
-    "x-powered-by": "The response discloses the underlying technology used.",
-    "user-agent": "The request includes the user agent string.",
-    "accept": "The request specifies acceptable media types.",
-    "accept-encoding": "The request specifies acceptable content encodings.",
-    "accept-language": "The request specifies preferred languages.",
-    "authorization": "The request includes authorization information.",
-    "cookie": "The request includes cookies.",
-    "x-api-key": "The request includes an API key.",
-    "x-client-id": "The request includes a client ID.",
-    "x-user-id": "The request includes a user ID.",
-    "api-key": "The request includes an API key.",
-    "client-id": "The request includes a client ID.",
-    "user-id": "The request includes a user ID.",
-    "apikey": "The request includes an API key.",
-    "clientid": "The request includes a client ID.",
-    "userid": "The request includes a user ID."
-  };
+export const details = headermapper.descriptions
