@@ -1,7 +1,7 @@
 
 .detail-bar-container:has(.detail-bar) {
     z-index: 2;
-    position: fixed;
+    /* position: fixed; */
     right: 0;
     top: 0;
     width: 25%;
@@ -67,4 +67,11 @@
     margin: 12px;
     margin-inline: auto;
     /* box-shadow: 0px -1px 20px 0px var(--primary) */
+}
+
+
+.contain-bar {
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
 }

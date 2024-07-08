@@ -21,7 +21,7 @@ function Colorpicker() {
             <div style={{background:color}} className="colorDisplay"></div>
         </button>
         <div style={{display: pickerShowing ? "block" : "none", position:"absolute"}}>
-            <SketchPicker disableAlpha={true} presetColors={["#867cff", "#ff0000"]} color={color} onChange={(color) => middleware(color.hex)} />
+            <SketchPicker disableAlpha={true} presetColors={["#867cff", "#ff0000", "#0C88E2"]} color={color} onChange={(color) => middleware(color.hex)} />
         </div>
         {/* <input ref={inputRef} type="color" style={{position:"relative", display:"none", top:"10em"}} value={color} onChange={(e) => setColor(e.target.value)} /> */}
     </div>
