@@ -1,7 +1,8 @@
 import { useReactFlow } from "reactflow"
 import "./TopBar.css"
 import { useEffect, useState } from "react"
-
+import DetailModal from "./DetailModal";
+import "./Modal.css"
 
 // TODO: LATER - One day, add an input for filtering. Until then, we'll have a mix and match approach to filtering
 // TODO: Now - work on dropdown for resource types to show
@@ -62,7 +63,13 @@ function Filter({filterSetter}) {
   );
 }
 
-
+function ModalContainer({modal, hideAction}){
+  return <div onClick={hideAction} className="modal-overlay">
+      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          {modal}
+      </div>
+  </div>
+}
 // function Filter({viewNodeSetter}){
 //     const supportedFilters = [
 //         "method:",
@@ -90,15 +97,26 @@ export default function TopBar({selectedNode, filterSetter}){
     console.log(selectedNode)
     let isSlug = false
     if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path"].includes(val))
+    let [activeModal, setActiveModal] = useState("") 
 
     /**
      * @type {HAREntry}
      */
     let data = selectedNode?.data
     let isActive = selectedNode !== null
+
+    let modal = <></>
+    switch (activeModal) {
+      case "details":
+        modal = <DetailModal data={data}></DetailModal>
+        break;
+      default:
+        break;
+    }
+
     return <div className='topbar '>
         <div className='left'>
-            <button tabIndex={0} disabled={!isActive}>Details</button>
+            <button tabIndex={0} disabled={!isActive} onClick={() => setActiveModal("details")}>Details</button>
             <button tabIndex={1} disabled={!isActive}>Highlight</button>
             <button tabIndex={2} disabled={!isActive}>Show Similar</button>
             <button tabIndex={3} disabled={!isActive}>Initiators</button>
@@ -111,5 +129,6 @@ export default function TopBar({selectedNode, filterSetter}){
             <Filter filterSetter={filterSetter}></Filter>
             <button>Core API Seeker</button>
         </div>
+        { (activeModal != "") && <ModalContainer hideAction={() => setActiveModal("")} modal={modal}></ModalContainer> }
     </div>
 }
