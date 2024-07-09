@@ -1,8 +1,8 @@
 .modal-container {
     box-sizing: border-box;
-    width: 95%;
+    width: 90%;
     border-radius:1em;
-    margin:2em;
+    margin:4em;
     padding:1em;
     background:var(--surface);
     outline: 2px solid var(--onSurface);
@@ -19,6 +19,12 @@
     top: 0;
     left: 0;
     z-index: 999;
+}
+
+.modal-container .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .resize-bar {
@@ -73,4 +79,49 @@ div.resize-handle.grabbing {
     box-shadow:0 0 10px 1px inset var(--onBackground);
     padding:.25em;
     border-radius: 10px;
+}
+
+.modal-container .font-preview span {
+    font-family: 'EmbeddedFont';
+}
+
+.modal-container .font-preview {
+    display:flex;
+    flex-direction: column;
+}
+
+
+.slider {
+    position:relative;
+    display:flex;
+    transition: all 1.5s;
+}
+
+.sliderBg {
+    position:absolute;
+    z-index: -1;
+}
+.sliderBg > button {
+    background: var(--surfaceContainerLowest)
+}
+
+.sliderButton {
+    transition: all 1.5s;
+}
+
+.leftspace {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right:transparent;
+    /* transition: all 1.5s; */
+}
+
+.rightspace {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left:transparent;
+}
+
+.slider .main {
+    background: var(--surfaceContainer);
 }

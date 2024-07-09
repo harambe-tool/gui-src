@@ -114,7 +114,9 @@ function HARImage(props) {
     <>
       <CardCore type={props.type} selected={props.selected} className="image">
         <span><b>{hostname}</b><br />{pathname}</span>
-        <img style={{width:"100%", borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} />
+        <div className='object-contain'>
+          <img style={{borderRadius:"10px"}} src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} />
+        </div>
       </CardCore>
       {/* <div className={`card image ${props.selected ? "selected" : ""}`}>
         <span><b>{hostname}</b><br />{pathname}</span><br></br>

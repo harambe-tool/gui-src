@@ -1,6 +1,6 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { details } from "../utils/classifiers";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import "./Modal.css"
 import prettydiff from "prettydiff";
 import "./../pages/HARTypes"
@@ -14,6 +14,7 @@ import "./../pages/HARTypes"
 
 import hljs from 'highlight.js';
 import "highlight.js/styles/github.css";
+import { MdClose } from "react-icons/md";
 
 // hljs.registerLanguage('json', json);
 // hljs.registerLanguage('html', html);
@@ -68,7 +69,7 @@ function CodeGenBlock({code}){
  * @param {{data:HARResponse | HARRequest}} props 
  */
 function SmartBodyPreview({data}){
-    let content = ""
+    // let content = ""
 
     let isResponse = data.content != null
     console.log(isResponse, "is response", data, data.postData)
@@ -76,7 +77,7 @@ function SmartBodyPreview({data}){
         /**
          * @type {HARContent}
          */
-        content = data.content
+        let content = data.content
         
         console.log(content, "content")
         if (content.mimeType.startsWith("image/")){
@@ -84,6 +85,22 @@ function SmartBodyPreview({data}){
                 style={{width:"100%", borderRadius:"10px"}} 
                 src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} 
             />
+        }
+        else if (content.mimeType.includes("font")){
+            return <>
+            <style>
+            {`@font-face {
+                font-family: 'EmbeddedFont';
+                src: url('data:${content.mimeType};charset=utf-8;base64,${content.text}');
+            }`}
+            </style>
+            <span><b>Font Preview</b></span>
+            <div className="font-preview">
+                <span>The quick brown fox jumps over the lazy dog.</span>
+                <span>ABCDEFGHIJKLMNOPQRSTUVWXYZ</span>
+                <span>abcdefghijklmnopqrstuvwxyz</span>
+            </div>
+            </>
         }
         return <CodeGenBlock code={content?.text}></CodeGenBlock>
     }
@@ -122,39 +139,87 @@ function BadgeGenerator({data}){
     </div>
 }
 
+
+function Switcher({setter, getter}){
+
+    let opposite = getter == "body" ? "headers" : "body"
+
+    const styleCreator = (type) => {return {
+        width: getter == type ? "0px" : "revert-layer", 
+        padding: getter == type ? "0px" : "revert-layer",
+        border: getter == type ? "0px" : "revert-layer"
+    }}
+
+    let firstStretcher = styleCreator("headers")
+    let secondStretcher = styleCreator("body")
+
+    return <button className="slider" onClick={()=>setter(opposite)}>
+        <div className="sliderBg">
+            <button className="leftspace">body</button>
+            <button className="rightspace">headers</button>
+        </div>
+        <div className="sliderButton">
+            <button style={{visibility:"hidden", ...secondStretcher}} className={getter + " leftspace"}><b>{opposite}</b></button>
+            <button className={getter+ " main"}><b>{getter}</b></button>
+            <button style={{visibility:"hidden", ...firstStretcher}} className={getter + " rightspace"}><b>{opposite}</b></button>
+        </div>
+    </button>
+}
+
 /**
  * 
  * @param {object} param0 
  * @param {HAREntry} param0.data 
  * @returns 
  */
-export default function DetailModal({data}){
+export default function DetailModal({data, hide}){
     let requestHasData = data.request?.postData != null || data.request.queryString.length > 0 
-
-    let responseContent = ""
+    
+    //  TODO: Create switcher for body and headers
+    // let responseContent = ""
+    /**
+     * @type {["body" | "headers", React.Dispatch<React.SetStateAction<"body" | "headers">>]}
+     */
     let [responseType, setResponseType] = useState("body")
 
-    let requestContent = ""
+    /**
+     * @type {["body" | "headers", React.Dispatch<React.SetStateAction<"body" | "headers">>]}
+     */
     let [requestType, setRequestType] = useState(requestHasData ? "body" : "headers")
 
     let badgeData = data["_data"]
 
-    console.log(data.response.content.mimeType)
+    // console.log(data.response.content.mimeType)
     return(
         <>
-            <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden"}}>{data.request.url}</b></span>
+            <div className="header">
+                <span></span>
+                <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden", width:"100%"}}>{data.request.url}</b></span>
+                {/* <button onClick={hide}>Close</button> */}
+                <MdClose style={{"cursor":"pointer"}} onClick={hide} size={20}></MdClose>
+            </div>
             <BadgeGenerator data={badgeData}></BadgeGenerator>
             <PanelGroup direction="horizontal">
                 <Panel style={{overflow:"scroll"}}>
-                    <span><b>Request</b></span> <br></br>
-                    <span>{data.request.method} {new URL(data.request.url).pathname}</span>
+                    <div>
+                        <div>
+                            <span><b>Request</b></span> <br></br>
+                            <span>{data.request.method} {new URL(data.request.url).pathname}</span>
+                        </div>
+                        <Switcher setter={setRequestType} getter={requestType}></Switcher>
+                    </div>
                     <SmartBodyPreview data={data.request}></SmartBodyPreview>
                     {/* <CodeGenBlock code={data.request?.postData?.text ?? ""}></CodeGenBlock> */}
                 </Panel>
                 <ResizeBar />
                 <Panel style={{overflow:"scroll"}}>
-                    <span><b>Response</b></span><br></br>
-                    <span>{data.response.status} {data.response.statusText}</span>
+                    <div>
+                        <div>
+                            <span><b>Response</b></span><br></br>
+                            <span>{data.response.status} {data.response.statusText}</span>
+                        </div>
+                        <Switcher setter={setResponseType} getter={responseType}></Switcher>
+                    </div>
                     <SmartBodyPreview data={data.response}></SmartBodyPreview>
                     {/* <CodeGenBlock code={data.response?.content?.text}></CodeGenBlock> */}
                 </Panel>

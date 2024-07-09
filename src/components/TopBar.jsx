@@ -3,6 +3,7 @@ import "./TopBar.css"
 import { useEffect, useState } from "react"
 import DetailModal from "./DetailModal";
 import "./Modal.css"
+import { ModalContainer } from "./Modal";
 
 // TODO: LATER - One day, add an input for filtering. Until then, we'll have a mix and match approach to filtering
 // TODO: Now - work on dropdown for resource types to show
@@ -63,13 +64,7 @@ function Filter({filterSetter}) {
   );
 }
 
-function ModalContainer({modal, hideAction}){
-  return <div onClick={hideAction} className="modal-overlay">
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-          {modal}
-      </div>
-  </div>
-}
+
 // function Filter({viewNodeSetter}){
 //     const supportedFilters = [
 //         "method:",
@@ -105,10 +100,11 @@ export default function TopBar({selectedNode, filterSetter}){
     let data = selectedNode?.data
     let isActive = selectedNode !== null
 
+    let hideAction = () => setActiveModal("")
     let modal = <></>
     switch (activeModal) {
       case "details":
-        modal = <DetailModal data={data}></DetailModal>
+        modal = <DetailModal hide={hideAction} data={data}></DetailModal>
         break;
       default:
         break;
@@ -129,6 +125,6 @@ export default function TopBar({selectedNode, filterSetter}){
             <Filter filterSetter={filterSetter}></Filter>
             <button>Core API Seeker</button>
         </div>
-        { (activeModal != "") && <ModalContainer hideAction={() => setActiveModal("")} modal={modal}></ModalContainer> }
+        { (activeModal != "") && <ModalContainer hideAction={hideAction} modal={modal}></ModalContainer> }
     </div>
 }

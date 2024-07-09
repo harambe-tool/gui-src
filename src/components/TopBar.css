@@ -8,7 +8,8 @@
     background: var(--background);
     border-bottom: 2px solid  var(--outline);
     justify-content: space-between;
-
+    /* overflow:hidden; */
+    max-height: 8em;
     align-items: center;
 }
 
@@ -20,6 +21,7 @@
 }
 
 .center span {
+    max-height: 100%;
     max-width:30em;
     text-overflow: ellipsis;
     overflow:hidden;
