@@ -89,9 +89,12 @@ export default function DynamicStylesheet({config}){
 
         `}
 
-        {theme.isDark ? "p b, a, h1 b, span b {color: #fff; text-shadow: 2px 2px "+color+";}" 
+        {theme.isDark ? `
+        p b, a, h1 b, span b, .boldified {color: #fff; text-shadow: 2px 2px "+color+";}
+        .sliderButton .main { background: ${hexFromArgb(theme["inverseSurface"])}1f }
+        ` 
         : 
-        `p b, a, h1 b, span b, .subheader, b {
+        `p b, a, h1 b, span b, .subheader, b, .boldified {
             text-shadow: 2px 2px  var(--secondaryPaletteKeyColor), 0 0px 4px  var(--secondaryPaletteKeyColor) !important;
             color: var(--background) !important;
         }
@@ -100,6 +103,7 @@ export default function DynamicStylesheet({config}){
             text-shadow: 2px 2px var(--inversePrimary),-0.5px -0.5px 4px var(--inversePrimary);
             font-size: 1.1em;
         }
+        .sliderButton .main { background: ${hexFromArgb(theme["inverseSurface"])}1f }
         .detail-bar {
             background: rgba(255,255,255,0.2) !important;
         }

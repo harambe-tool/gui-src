@@ -126,10 +126,14 @@ h1, h2 {
   background-color: #fff;
 }
 
-p b, a, h1 b, span b {
+p b, a, h1 b, span b, .boldified {
   /* This is actually done in DynamicStylesheet! */
   color: var(--onSurfaceVariant);
   text-shadow: 2px 2px var(--primaryPaletteKeyColor);
+}
+
+.boldified {
+  font-weight:bold
 }
 
 .sep .darkmode {

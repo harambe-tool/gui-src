@@ -141,27 +141,33 @@ function BadgeGenerator({data}){
 
 
 function Switcher({setter, getter}){
+    let options = ["body", "headers", "query", "analysis"]
 
-    let opposite = getter == "body" ? "headers" : "body"
-
-    const styleCreator = (type) => {return {
-        width: getter == type ? "0px" : "revert-layer", 
-        padding: getter == type ? "0px" : "revert-layer",
-        border: getter == type ? "0px" : "revert-layer"
+    const styleCreator = (visible) => {return {
+        width: visible ? "revert-layer" : "0px",
+        padding: visible ? "revert-layer" : "0px",
+        border: visible ? "revert-layer" : "0px" 
     }}
+    const buttonStyle = {
+        background:"transparent",
+        color:"transparent",
+        border:"transparent",
+        textShadow:"none",
+        opacity:0
+    }
 
-    let firstStretcher = styleCreator("headers")
-    let secondStretcher = styleCreator("body")
-
-    return <button className="slider" onClick={()=>setter(opposite)}>
+    const classbuilder = (arr, index)=>index == 0 && arr.length != 1 ? "leftspace" : index == arr.length-1 ? "rightspace" : "centerspace"
+    return <button className="slider">
         <div className="sliderBg">
-            <button className="leftspace">body</button>
-            <button className="rightspace">headers</button>
+            {options.map((val,index,arr)=><button tabIndex={index} onClick={()=>setter(val)} className={classbuilder(arr, index)+ (val == getter ? " boldified " : "")}>{val}</button>)}
         </div>
         <div className="sliderButton">
-            <button style={{visibility:"hidden", ...secondStretcher}} className={getter + " leftspace"}><b>{opposite}</b></button>
+            {
+                options.map((option, index, arr)=>{
+                    return <button onClick={()=>setter(option)} style={{...styleCreator(index < options.indexOf(getter)), ...buttonStyle}} className={getter + " "+  classbuilder(arr,index)  }><b>{option}</b></button>
+                })
+            }
             <button className={getter+ " main"}><b>{getter}</b></button>
-            <button style={{visibility:"hidden", ...firstStretcher}} className={getter + " rightspace"}><b>{opposite}</b></button>
         </div>
     </button>
 }
@@ -189,16 +195,19 @@ export default function DetailModal({data, hide}){
     let [requestType, setRequestType] = useState(requestHasData ? "body" : "headers")
 
     let badgeData = data["_data"]
-
-    // console.log(data.response.content.mimeType)
+    let respoContent = data.response.content?.text ?? ""
+    let isb64respo = data.response.content.encoding == "base64"
+    let containedURI = ("data:"+data.response.content.mimeType)+";base64,"+ (isb64respo ? respoContent : btoa(respoContent))
     return(
         <>
             <div className="header">
                 <span></span>
                 <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden", width:"100%"}}>{data.request.url}</b></span>
                 {/* <button onClick={hide}>Close</button> */}
-                <div>
-                    <MdOutlineFileDownload style={{cursor:"pointer", marginRight:"1em"}} size={25}></MdOutlineFileDownload>
+                <div style={{display:"flex"}}>
+                    <a style={{background:"none", display:"flex", padding:0, marginRight:"1em"}} href={containedURI} download={data.request.url}>
+                        <MdOutlineFileDownload style={{cursor:"pointer"}} size={25}></MdOutlineFileDownload>
+                    </a>
                     <MdClose style={{"cursor":"pointer"}} onClick={hide} size={25}></MdClose>
                 </div>
             </div>

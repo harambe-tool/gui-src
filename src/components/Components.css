@@ -69,6 +69,10 @@
     border-radius: 12px;
 }
 
+span.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo {
+    color:var(--onSecondaryContainer)
+}
+
 .hljs-string {
     color: var(--primaryFixedDim) !important;
     text-shadow: 1px 1px var(--inversePrimary);
