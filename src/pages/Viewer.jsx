@@ -19,6 +19,7 @@ const trackers = [
     "https://www.google-analytics.com/j/collect",
     "https://stats.g.doubleclick.net",
     "https://analytics.google.com/g/collect",
+    "https://www.google-analytics.com/collect",
     "ads/ga-audiences",
     "googleads",
     "adservice",

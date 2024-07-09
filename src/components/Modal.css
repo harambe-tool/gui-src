@@ -69,6 +69,7 @@ div.resize-handle.grabbing {
 .tooltip {
     position:absolute;
     pointer-events: none;
+    z-index:2
 }
 
 .tooltip > .text {
@@ -91,7 +92,9 @@ div.resize-handle.grabbing {
 }
 
 
+/*  Slider Button */
 .slider {
+    text-wrap: nowrap;
     position:relative;
     display:flex;
     transition: all 1.5s;
@@ -124,4 +127,20 @@ div.resize-handle.grabbing {
 
 .slider .main {
     background: var(--surfaceContainer);
+}
+
+/* Panel Stuff */
+
+.panel-header {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    justify-content: space-between;
+    /* padding:1em; */
+
+    box-sizing: border-box;
+}
+
+.panel {
+    padding:1em;
 }

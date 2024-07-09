@@ -14,7 +14,7 @@ import "./../pages/HARTypes"
 
 import hljs from 'highlight.js';
 import "highlight.js/styles/github.css";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdDownload, MdFileDownload, MdOutlineDownload, MdOutlineFileDownload } from "react-icons/md";
 
 // hljs.registerLanguage('json', json);
 // hljs.registerLanguage('html', html);
@@ -173,7 +173,8 @@ function Switcher({setter, getter}){
  * @returns 
  */
 export default function DetailModal({data, hide}){
-    let requestHasData = data.request?.postData != null || data.request.queryString.length > 0 
+    let hasQueryParams = data.request.queryString.length > 0
+    let requestHasData = data.request?.postData != null || hasQueryParams
     
     //  TODO: Create switcher for body and headers
     // let responseContent = ""
@@ -196,24 +197,30 @@ export default function DetailModal({data, hide}){
                 <span></span>
                 <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden", width:"100%"}}>{data.request.url}</b></span>
                 {/* <button onClick={hide}>Close</button> */}
-                <MdClose style={{"cursor":"pointer"}} onClick={hide} size={20}></MdClose>
+                <div>
+                    <MdOutlineFileDownload style={{cursor:"pointer", marginRight:"1em"}} size={25}></MdOutlineFileDownload>
+                    <MdClose style={{"cursor":"pointer"}} onClick={hide} size={25}></MdClose>
+                </div>
             </div>
             <BadgeGenerator data={badgeData}></BadgeGenerator>
             <PanelGroup direction="horizontal">
-                <Panel style={{overflow:"scroll"}}>
-                    <div>
+                <Panel className="panel" style={{overflow:"scroll"}}>
+                    <div className="panel-header">
                         <div>
                             <span><b>Request</b></span> <br></br>
                             <span>{data.request.method} {new URL(data.request.url).pathname}</span>
                         </div>
                         <Switcher setter={setRequestType} getter={requestType}></Switcher>
                     </div>
+                    {
+                        // (()=>{if (hasQueryParams && ){return <></>}})()
+                    }
                     <SmartBodyPreview data={data.request}></SmartBodyPreview>
                     {/* <CodeGenBlock code={data.request?.postData?.text ?? ""}></CodeGenBlock> */}
                 </Panel>
                 <ResizeBar />
-                <Panel style={{overflow:"scroll"}}>
-                    <div>
+                <Panel className="panel" style={{overflow:"scroll"}}>
+                    <div className="panel-header">
                         <div>
                             <span><b>Response</b></span><br></br>
                             <span>{data.response.status} {data.response.statusText}</span>

@@ -44,6 +44,7 @@
                 "x-ms-request-id": "azure",
                 "x-amzn-trace-id": "aws-elb",
                 "authorization": "authorization",
+                "Authorization": "authorization",
                 "x-api-key": "apikey",
                 "api-key": "apikey",
                 "apikey": "apikey",
