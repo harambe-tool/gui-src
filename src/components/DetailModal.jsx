@@ -71,8 +71,16 @@ function CodeGenBlock({code}){
 function SmartBodyPreview({data}){
     // let content = ""
 
+
     let isResponse = data.content != null
-    console.log(isResponse, "is response", data, data.postData)
+    
+    /**
+     * @type {HARContent}
+     */
+    let postContent = data?.postData?.text
+
+    
+    // console.log(isResponse, "is response", data, data.postData)
     if (isResponse){
         /**
          * @type {HARContent}
@@ -105,8 +113,13 @@ function SmartBodyPreview({data}){
         return <CodeGenBlock code={content?.text}></CodeGenBlock>
     }
     else{
-
-        return <CodeGenBlock code={data.postData}></CodeGenBlock>
+        console.log("Request ting", postContent != undefined, data?.postData?.text )
+        if (postContent != undefined){
+            // postContent.text
+            console.log("POST CONTENT!!", postContent)
+            return <CodeGenBlock code={postContent}></CodeGenBlock>
+        }
+        return <CodeGenBlock code={" "}></CodeGenBlock>
     }
     // else {
 
@@ -205,7 +218,7 @@ export default function DetailModal({data, hide}){
                 <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden", width:"100%"}}>{data.request.url}</b></span>
                 {/* <button onClick={hide}>Close</button> */}
                 <div style={{display:"flex"}}>
-                    <a style={{background:"none", display:"flex", padding:0, marginRight:"1em"}} href={containedURI} download={data.request.url}>
+                    <a style={{background:"none", display:"flex", padding:0, marginRight:"1em", boxShadow:"none"}} href={containedURI} download={data.request.url}>
                         <MdOutlineFileDownload style={{cursor:"pointer"}} size={25}></MdOutlineFileDownload>
                     </a>
                     <MdClose style={{"cursor":"pointer"}} onClick={hide} size={25}></MdClose>
