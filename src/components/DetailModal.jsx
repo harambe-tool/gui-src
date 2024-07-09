@@ -4,6 +4,9 @@ import React, { useRef, useState } from "react";
 import "./Modal.css"
 import prettydiff from "prettydiff";
 import "./../pages/HARTypes"
+
+import { encode, decode } from 'js-base64';
+
 // let prettydiff = require("prettydiff");
 // import hljs from 'highlight.js/lib/core';
 // import json from 'highlight.js/lib/languages/json';
@@ -36,16 +39,23 @@ function ResizeBar({}){
 
 function CodeGenBlock({code}){
     let code_modified = code ?? "<empty>"
-    let isHTML = code_modified.startsWith("<!")
-    // let output = "",
-    let options = prettydiff.options;
-    options.lexer = "auto"
-    if (isHTML)options.lexer = "markup"
-    options.source = code_modified;
-    options.mode = "beautify"
-    options.language = isHTML ? "html" : "auto"
-    code_modified = prettydiff();
-    console.log( code, options)
+    code_modified = code_modified.length == 0 ? "<no content>" : code_modified
+
+    try {
+        let isHTML = code_modified.startsWith("<!")
+        // let output = "",
+        let options = prettydiff.options;
+        options.lexer = "auto"
+        if (isHTML)options.lexer = "markup"
+        options.source = code_modified;
+        options.mode = "beautify"
+        options.language = isHTML ? "html" : "auto"
+        code_modified = prettydiff();
+        console.log( code_modified, options)
+    }
+    catch (e){
+        console.log("[HARAMBE_SAY] Harambe think something wrong...", code_modified, e)
+    }
     // Smart Prettify
     // ...
     // code_modified = esthetic.format(code_modified)
@@ -87,7 +97,7 @@ function SmartBodyPreview({data}){
          */
         let content = data.content
         
-        console.log(content, "content")
+        console.log(content.text, "content")
         if (content.mimeType.startsWith("image/")){
             return <img 
                 style={{width:"100%", borderRadius:"10px"}} 
@@ -119,7 +129,7 @@ function SmartBodyPreview({data}){
             console.log("POST CONTENT!!", postContent)
             return <CodeGenBlock code={postContent}></CodeGenBlock>
         }
-        return <CodeGenBlock code={" "}></CodeGenBlock>
+        return <CodeGenBlock code={"<empty>"}></CodeGenBlock>
     }
     // else {
 
@@ -210,7 +220,7 @@ export default function DetailModal({data, hide}){
     let badgeData = data["_data"]
     let respoContent = data.response.content?.text ?? ""
     let isb64respo = data.response.content.encoding == "base64"
-    let containedURI = ("data:"+data.response.content.mimeType)+";base64,"+ (isb64respo ? respoContent : btoa(respoContent))
+    let containedURI = ("data:"+data.response.content.mimeType)+";base64,"+ (isb64respo ? respoContent : encode(respoContent))
     return(
         <>
             <div className="header">
