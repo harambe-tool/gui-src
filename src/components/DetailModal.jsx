@@ -3,7 +3,7 @@ import { details } from "../utils/classifiers";
 import { useRef, useState } from "react";
 import "./Modal.css"
 import prettydiff from "prettydiff";
-
+import "./../pages/HARTypes"
 // let prettydiff = require("prettydiff");
 // import hljs from 'highlight.js/lib/core';
 // import json from 'highlight.js/lib/languages/json';
@@ -38,10 +38,11 @@ function CodeGenBlock({code}){
     let isHTML = code_modified.startsWith("<!")
     // let output = "",
     let options = prettydiff.options;
+    options.lexer = "auto"
+    if (isHTML)options.lexer = "markup"
     options.source = code_modified;
     options.mode = "beautify"
     options.language = isHTML ? "html" : "auto"
-    if (isHTML)options.lexer = "markup"
     code_modified = prettydiff();
     console.log( code, options)
     // Smart Prettify
@@ -69,23 +70,34 @@ function CodeGenBlock({code}){
 function SmartBodyPreview({data}){
     let content = ""
 
-    let isResponse = data?.postData != null
-
+    let isResponse = data.content != null
+    console.log(isResponse, "is response", data, data.postData)
     if (isResponse){
         /**
          * @type {HARContent}
          */
-        let content = data.content
+        content = data.content
+        
+        console.log(content, "content")
         if (content.mimeType.startsWith("image/")){
             return <img 
                 style={{width:"100%", borderRadius:"10px"}} 
                 src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} 
             />
         }
+        return <CodeGenBlock code={content?.text}></CodeGenBlock>
     }
+    else{
+
+        return <CodeGenBlock code={data.postData}></CodeGenBlock>
+    }
+    // else {
+
+    //     let pData = data?.postData
+
+    // }
 
 
-    return <CodeGenBlock code={data.response?.content?.text}></CodeGenBlock>
 
 
 }
@@ -136,13 +148,15 @@ export default function DetailModal({data}){
                 <Panel style={{overflow:"scroll"}}>
                     <span><b>Request</b></span> <br></br>
                     <span>{data.request.method} {new URL(data.request.url).pathname}</span>
-                    <CodeGenBlock code={data.request?.postData?.text ?? ""}></CodeGenBlock>
+                    <SmartBodyPreview data={data.request}></SmartBodyPreview>
+                    {/* <CodeGenBlock code={data.request?.postData?.text ?? ""}></CodeGenBlock> */}
                 </Panel>
                 <ResizeBar />
                 <Panel style={{overflow:"scroll"}}>
                     <span><b>Response</b></span><br></br>
                     <span>{data.response.status} {data.response.statusText}</span>
-                    <CodeGenBlock code={data.response?.content?.text}></CodeGenBlock>
+                    <SmartBodyPreview data={data.response}></SmartBodyPreview>
+                    {/* <CodeGenBlock code={data.response?.content?.text}></CodeGenBlock> */}
                 </Panel>
             </PanelGroup>
         </>

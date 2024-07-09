@@ -16,6 +16,9 @@ let initiatorIndexes = [];
 
 const trackers = [
     "https://www.google-analytics.com/g/collect",
+    "https://www.google-analytics.com/j/collect",
+    "https://stats.g.doubleclick.net",
+    "https://analytics.google.com/g/collect",
     "ads/ga-audiences",
     "googleads",
     "adservice",
@@ -26,7 +29,9 @@ const trackers = [
     "ingest.sentry.io",
     "bat.bing.com/p/insights",
     "fbevents",
-    "https://play.google.com/log"
+    "https://play.google.com/log",
+    "https://tr.snapchat.com/p",
+    "https://api.realytics.io/event/track?cb="
 ]
 function isAnalytics(url) {
     return trackers.some(tracker => url.includes(tracker))
