@@ -11,6 +11,9 @@ import TopBar from '../components/TopBar';
 import { useNavigate } from 'react-router-dom';
 import fingerprintClassifier from '../utils/classifiers';
 
+import uuidvalidator from "uuid-validate"
+import { isNumeric } from '../utils/validators';
+
 let initiators = {}
 let initiatorIndexes = [];
 
@@ -179,13 +182,17 @@ function buildDescendingPath(entry, index) {
 
     decomposedPath.map((slug, index, full) => {
         let fullPath = full.slice(0, index + 1).join("/") //this is fine
-
+        /**
+         * @type {bool}
+         */
+        let isID = uuidvalidator(slug) || isNumeric(slug)
         // Prevent duplicate slug creations
         let searchResults = decomposedPaths.findIndex((decomposed) => decomposed.path == fullPath)
         if (searchResults == -1) decomposedPaths.push({
             id: decomposedPaths.length,
             path: fullPath,
-            label: slug
+            label: slug,
+            isID: isID
         })
     })
 }

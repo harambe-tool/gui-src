@@ -80,7 +80,7 @@ function HARCard(props) {
 function ApiPath(props){
   return <>
     <CardCore type={props.type} selected={props.selected} className="api_path">
-        <b>Slug / Path Component</b>
+        <b>{props.data.isID ? "Path Component (ID)" : "Path Component"}</b>
         <span>{props.data.label}</span>
         <br></br>
         <b>Full Path</b>

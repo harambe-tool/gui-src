@@ -222,9 +222,44 @@ function DetailBar_core_slug({data}){
 
 }
 
+// function DetailBar_core_slug({data}){
+//     console.log(decomposedPaths);
+//     // FOr viewing Slug entries
+//     let children = decomposedPaths.filter((path)=>path.path.startsWith(data.path))
+
+//     let textualChild = (child)=>{
+//         const parts = child.split("/")
+//         const last = parts.pop()
+    
+//         const folderNames = parts.map((part) => part.replace(/./g, "-"));
+//         const folderStructure = folderNames.join("-");
+//         return folderStructure+last 
+//     }
+//     return <div className="detail-bar-container">
+//         <div className="detail-bar">
+//             <span className="subheader">Inspecting the following slug</span>
+//             <span>{data.path}</span>
+//             <div className="sep small"></div>
+//             <span>Children (flattened)</span>
+//             <div>
+//                 {children.map((path, index, arr)=>{
+//                     let snippedPath = path.path.replace(data.path,"");
+//                     // console.log(arr)
+//                     let text = snippedPath.startsWith(arr[index-1]?.path) ? snippedPath.replace(arr[index-1]?.path,"-".repeat(arr[index-1].path.length)) : snippedPath
+//                     console.log(text)
+//                     let textualized = textualChild(text)
+//                     return <span style={{fontSize:".6em"}} key={path.id}>
+//                         {path.isID ? <b>{textualized}</b> : textualized}
+//                         </span>
+//                 })}
+//             </div>
+//         </div>
+//     </div>
+// }
+
 export default function DetailBar({log}){
     if (!log) return <div></div>
-    let isSlug = Object.keys(log).every((val)=>["id","label","path"].includes(val))
+    let isSlug = Object.keys(log).every((val)=>["id","label","path", "isID"].includes(val))
     console.log(isSlug,  Object.keys(log));
     return <div className="contain-bar">{isSlug ?  <DetailBar_core_slug data={log}> </DetailBar_core_slug> : <DetailBar_core log={log}/>}</div>
 }

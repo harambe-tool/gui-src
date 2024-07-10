@@ -91,7 +91,7 @@ export default function TopBar({selectedNode, filterSetter}){
     // let selectedNode = nodes.filter(node => node.selected)[0]
     console.log(selectedNode)
     let isSlug = false
-    if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path"].includes(val))
+    if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path", "isID"].includes(val))
     let [activeModal, setActiveModal] = useState("") 
 
     /**

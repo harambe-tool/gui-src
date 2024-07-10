@@ -90,7 +90,7 @@ export default function DynamicStylesheet({config}){
         `}
 
         {theme.isDark ? `
-        p b, a, h1 b, span b, .boldified {color: #fff; text-shadow: 2px 2px "+color+";}
+        p b, a, h1 b, span b, .boldified {color: #fff; text-shadow: 2px 2px ${color};}
         .sliderButton .main { background: ${hexFromArgb(theme["inverseSurface"])}1f }
         ` 
         : 
