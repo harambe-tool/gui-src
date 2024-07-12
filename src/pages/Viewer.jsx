@@ -150,7 +150,7 @@ function classifier(entry, index_any, internalPredicate) {
     }
 
     // console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
-    if (isInternal && entry.response.content.mimeType.startsWith("application/json")) {
+    if (isInternal && (entry.response.content.mimeType.startsWith("application/json") || entry?.request?.method == "POST")) {
         type = "apiRequest_core"
     }
 

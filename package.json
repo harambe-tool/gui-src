@@ -12,6 +12,7 @@
   "dependencies": {
     "@dagrejs/dagre": "^1.1.2",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@liquify/prettify": "^0.5.5-beta.1",
     "@material/material-color-utilities": "^0.3.0",
     "@tanstack/react-table": "^8.19.2",
     "highlight.js": "^11.9.0",
@@ -36,6 +37,7 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "esthetic": "^0.6.4-beta.1",
     "vite": "^5.2.0"
   }
 }

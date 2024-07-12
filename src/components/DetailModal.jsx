@@ -2,7 +2,11 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { details } from "../utils/classifiers";
 import React, { useRef, useState } from "react";
 import "./Modal.css"
+// TODO: drop prettydiff
 import prettydiff from "prettydiff";
+//TODO: Support esthetic
+import esthetic from "esthetic";
+
 import "./../pages/HARTypes"
 
 import { encode, decode } from 'js-base64';
@@ -18,6 +22,7 @@ import { encode, decode } from 'js-base64';
 import hljs from 'highlight.js';
 import "highlight.js/styles/github.css";
 import { MdClose, MdDownload, MdFileDownload, MdOutlineDownload, MdOutlineFileDownload } from "react-icons/md";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 // hljs.registerLanguage('json', json);
 // hljs.registerLanguage('html', html);
@@ -34,7 +39,6 @@ function ResizeBar({}){
         ></div>
     </PanelResizeHandle>
 }
-
 
 
 function CodeGenBlock({code}){
@@ -74,62 +78,147 @@ function CodeGenBlock({code}){
     </pre>
 }
 
+
+// HeaderPreview({data})
+// useReactTable({ columns})
+
+// [
+//     {
+//         "name": "Access-Control-Allow-Origin",
+//         "value": "*"
+//     },
+//     {
+//         "name": "Connection",
+//         "value": "keep-alive"
+//     },
+//     {
+//         "name": "Content-Type",
+//         "value": "application/json"
+//     },
+//     {
+//         "name": "Date",
+//         "value": "Thu, 13 Jun 2024 23:09:58 GMT"
+//     }, {
+//         "name": "Server",
+//         "value": "nginx/1.25.3"
+//     }, {
+//         "name": "Strict-Transport-Security",
+//         "value": "max-age=63072000; includeSubDomains"
+//     }, {
+//         "name": "Transfer-Encoding",
+//         "value": "chunked"
+//     }, {
+//         "name": "Vary",
+//         "value": "Origin"
+//     }, {
+//         "name": "Vary",
+//         "value": "Access-Control-Request-Method"
+//     }, {
+//         "name": "Vary",
+//         "value": "Access-Control-Request-Headers"
+//     }
+// ] 
+
+/**
+ * @type  {import("@tanstack/react-table").ColumnDef<unknown,any>[]>}
+ */
+const columns = [
+    {accessorFn:(row)=>row.name, header:"Name",accessorKey:"name"},
+    {accessorFn:(row)=>row.value, header:"Value",accessorKey:"value"}
+]
+
 /**
  * 
  * @param {{data:HARResponse | HARRequest}} props 
  */
-function SmartBodyPreview({data}){
+function SmartBodyPreview({data, type}){
     // let content = ""
 
+    // console.log("[HARAMBE TYPE] Type ==", type)
+    if (type == "headers"){
+        let headerTable = useReactTable({
+            columns:columns,
+            data:data.headers,
+            getCoreRowModel: getCoreRowModel()
+        })
 
-    let isResponse = data.content != null
-    
-    /**
-     * @type {HARContent}
-     */
-    let postContent = data?.postData?.text
+        return <table style={{width:"100%", overflow:"hidden"}}>
+            <thead>
+                <tr>
+                    <th>Header</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {
+                    headerTable.getRowModel().rows.map((row,index)=>{
+                        return <tr>
+                            <td>{row.renderValue("name")}</td>
+                            <td className="value">{row.renderValue("value")}</td>
+                        </tr>
+                    })
+                }
+            </tbody>
+        </table>
+        
+        // return 
+        // return <CodeGenBlock code={JSON.stringify(data.headers, null, 2)}></CodeGenBlock>
+    }
 
-    
-    // console.log(isResponse, "is response", data, data.postData)
-    if (isResponse){
+
+    if (type == "body"){
+
+        
+        let isResponse = data.content != null
+        
         /**
          * @type {HARContent}
-         */
-        let content = data.content
-        
-        console.log(content.text, "content")
-        if (content.mimeType.startsWith("image/")){
-            return <img 
+        */
+       let postContent = data?.postData?.text
+       
+       
+       // console.log(isResponse, "is response", data, data.postData)
+       if (isResponse){
+           /**
+            * @type {HARContent}
+           */
+          let content = data.content
+          
+          console.log(content.text, "content")
+          if (content.mimeType.startsWith("image/")){
+                return <img 
                 style={{width:"100%", borderRadius:"10px"}} 
                 src={content.encoding != "base64" ? content.text : "data:"+content.mimeType+";base64,"+content.text} 
-            />
+                />
+            }
+            else if (content.mimeType.includes("font")){
+                return <>
+                    <style>
+                    {`@font-face {
+                        font-family: 'EmbeddedFont';
+                        src: url('data:${content.mimeType};charset=utf-8;base64,${content.text}');
+                    }`}
+                    </style>
+                    <span><b>Font Preview</b></span>
+                    <div className="font-preview">
+                        <span>The quick brown fox jumps over the lazy dog.</span>
+                        <span>ABCDEFGHIJKLMNOPQRSTUVWXYZ</span>
+                        <span>abcdefghijklmnopqrstuvwxyz</span>
+                    </div>
+                </>
+            }
+            return <CodeGenBlock code={content?.text}></CodeGenBlock>
         }
-        else if (content.mimeType.includes("font")){
-            return <>
-            <style>
-            {`@font-face {
-                font-family: 'EmbeddedFont';
-                src: url('data:${content.mimeType};charset=utf-8;base64,${content.text}');
-            }`}
-            </style>
-            <span><b>Font Preview</b></span>
-            <div className="font-preview">
-                <span>The quick brown fox jumps over the lazy dog.</span>
-                <span>ABCDEFGHIJKLMNOPQRSTUVWXYZ</span>
-                <span>abcdefghijklmnopqrstuvwxyz</span>
-            </div>
-            </>
+
+        else{
+            console.log("Request ting", postContent != undefined, data?.postData?.text )
+            if (postContent != undefined){
+                // postContent.text
+                console.log("POST CONTENT!!", postContent)
+                return <CodeGenBlock code={postContent}></CodeGenBlock>
+            }
+            return <CodeGenBlock code={"<empty>"}></CodeGenBlock>
         }
-        return <CodeGenBlock code={content?.text}></CodeGenBlock>
-    }
-    else{
-        console.log("Request ting", postContent != undefined, data?.postData?.text )
-        if (postContent != undefined){
-            // postContent.text
-            console.log("POST CONTENT!!", postContent)
-            return <CodeGenBlock code={postContent}></CodeGenBlock>
-        }
-        return <CodeGenBlock code={"<empty>"}></CodeGenBlock>
     }
     // else {
 
@@ -221,6 +310,9 @@ export default function DetailModal({data, hide}){
     let respoContent = data.response.content?.text ?? ""
     let isb64respo = data.response.content.encoding == "base64"
     let containedURI = ("data:"+data.response.content.mimeType)+";base64,"+ (isb64respo ? respoContent : encode(respoContent))
+    
+
+    
     return(
         <>
             <div className="header">
@@ -228,7 +320,7 @@ export default function DetailModal({data, hide}){
                 <span style={{display:"flex"}}>Inspecting: <b style={{textOverflow: "ellipsis", overflow: "hidden", width:"100%"}}>{data.request.url}</b></span>
                 {/* <button onClick={hide}>Close</button> */}
                 <div style={{display:"flex"}}>
-                    <a style={{background:"none", display:"flex", padding:0, marginRight:"1em", boxShadow:"none"}} href={containedURI} download={data.request.url}>
+                    <a style={{background:"none", display:"flex", padding:0, marginRight:"1em", boxShadow:"none"}} className="properColor" href={containedURI} download={data.request.url}>
                         <MdOutlineFileDownload style={{cursor:"pointer"}} size={25}></MdOutlineFileDownload>
                     </a>
                     <MdClose style={{"cursor":"pointer"}} onClick={hide} size={25}></MdClose>
@@ -247,7 +339,7 @@ export default function DetailModal({data, hide}){
                     {
                         // (()=>{if (hasQueryParams && ){return <></>}})()
                     }
-                    <SmartBodyPreview data={data.request}></SmartBodyPreview>
+                    <SmartBodyPreview type={requestType} data={data.request}></SmartBodyPreview>
                     {/* <CodeGenBlock code={data.request?.postData?.text ?? ""}></CodeGenBlock> */}
                 </Panel>
                 <ResizeBar />
@@ -259,7 +351,7 @@ export default function DetailModal({data, hide}){
                         </div>
                         <Switcher setter={setResponseType} getter={responseType}></Switcher>
                     </div>
-                    <SmartBodyPreview data={data.response}></SmartBodyPreview>
+                    <SmartBodyPreview type={responseType} data={data.response}></SmartBodyPreview>
                     {/* <CodeGenBlock code={data.response?.content?.text}></CodeGenBlock> */}
                 </Panel>
             </PanelGroup>

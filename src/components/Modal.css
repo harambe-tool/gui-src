@@ -98,6 +98,7 @@ div.resize-handle.grabbing {
 .slider {
     text-wrap: nowrap;
     position:relative;
+    height: fit-content;
     padding: 6px !important;
     display:flex;
 }
@@ -170,4 +171,23 @@ div.resize-handle.grabbing {
 
 .panel {
     padding:1em;
+}
+
+/* Headers */
+td.value {
+    line-break: anywhere;    
+}
+
+td:not(.value){
+}
+
+td {
+    border:1px solid var(--outline);
+    border-radius:5px;
+    padding:5px
+
+}
+
+a.properColor > svg {
+    color:var(--onBackground) !important;
 }
