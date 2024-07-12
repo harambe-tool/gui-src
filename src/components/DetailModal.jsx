@@ -2,10 +2,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { details } from "../utils/classifiers";
 import React, { useRef, useState } from "react";
 import "./Modal.css"
-// TODO: drop prettydiff
-import prettydiff from "prettydiff";
-//TODO: Support esthetic
-import esthetic from "esthetic";
 
 import "./../pages/HARTypes"
 
@@ -19,10 +15,10 @@ import { encode, decode } from 'js-base64';
 // import css from 'highlight.js/lib/languages/css';
 
 
-import hljs from 'highlight.js';
 import "highlight.js/styles/github.css";
 import { MdClose, MdDownload, MdFileDownload, MdOutlineDownload, MdOutlineFileDownload } from "react-icons/md";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import CodeGenBlock from "./CodeFormat";
 
 // hljs.registerLanguage('json', json);
 // hljs.registerLanguage('html', html);
@@ -40,43 +36,29 @@ function ResizeBar({}){
     </PanelResizeHandle>
 }
 
+// function HighlightBlock({data}){
+//     let code_formatted = hljs.highlightAuto(data, ["json", "html", "js", "css", "xml", "text"]).value
+//     return <pre>
+//         <code>
+//         <div dangerouslySetInnerHTML = {{__html:code_formatted}}></div>
+//         </code>
+//     </pre>
+// }
 
-function CodeGenBlock({code}){
-    let code_modified = code ?? "<empty>"
-    code_modified = code_modified.length == 0 ? "<no content>" : code_modified
+// async function CodeGenBlock({code}){
+//     let code_modified = code ?? "<empty>"
+//     code_modified = code_modified.length == 0 ? "<no content>" : code_modified
 
-    try {
-        let isHTML = code_modified.startsWith("<!")
-        // let output = "",
-        let options = prettydiff.options;
-        options.lexer = "auto"
-        if (isHTML)options.lexer = "markup"
-        options.source = code_modified;
-        options.mode = "beautify"
-        options.language = isHTML ? "html" : "auto"
-        code_modified = prettydiff();
-        console.log( code_modified, options)
-    }
-    catch (e){
-        console.log("[HARAMBE_SAY] Harambe think something wrong...", code_modified, e)
-    }
-    // Smart Prettify
-    // ...
-    // code_modified = esthetic.format(code_modified)
+//     try {
+//         code_modified = esthetic.format(code_modified)
+//     }
+//     catch (e){
+//         // Formatter may throw an error... Can't trust formatters with incomplete docs!
+//         console.log("[HARAMBE_SAY] Harambe think something wrong...", code_modified, e)
+//     }
 
-    // try {
-    //   prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
-    // } catch (error) {
-    //   console.log(error)
-    // }
-    // prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
-    let code_formatted = hljs.highlightAuto(code_modified, ["json", "html", "js", "css", "xml", "text"]).value
-    return <pre>
-        <code>
-        <div dangerouslySetInnerHTML = {{__html:code_formatted}}></div>
-        </code>
-    </pre>
-}
+//     return <HighlightBlock data={code_modified}></HighlightBlock>
+// }
 
 
 // HeaderPreview({data})
