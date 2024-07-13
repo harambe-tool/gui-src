@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import DetailModal from "./DetailModal";
 import "./Modal.css"
 import { ModalContainer } from "./Modal";
+import { loggers } from "../utils/loggers";
 
 // TODO: LATER - One day, add an input for filtering. Until then, we'll have a mix and match approach to filtering
 // TODO: Now - work on dropdown for resource types to show
@@ -22,7 +23,7 @@ function Filter({filterSetter}) {
   }
 
   useEffect(()=>{
-    console.log("filter changed")
+    loggers.topbar("Filter changed")
   }, [filter])
 
   let dropdownMappings = {
@@ -89,7 +90,7 @@ export default function TopBar({selectedNode, filterSetter}){
     // get selected node
     // let nodes = instance.getNodes()
     // let selectedNode = nodes.filter(node => node.selected)[0]
-    console.log(selectedNode)
+    loggers.topbar(selectedNode)
     let isSlug = false
     if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path", "isID"].includes(val))
     let [activeModal, setActiveModal] = useState("") 

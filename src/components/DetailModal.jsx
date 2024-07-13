@@ -7,18 +7,11 @@ import "./../pages/HARTypes"
 
 import { encode, decode } from 'js-base64';
 
-// let prettydiff = require("prettydiff");
-// import hljs from 'highlight.js/lib/core';
-// import json from 'highlight.js/lib/languages/json';
-// import html from 'highlight.js/lib/languages/html'; //chance of something going wrong: 99%
-// import javascript from 'highlight.js/lib/languages/javascript';
-// import css from 'highlight.js/lib/languages/css';
-
-
 import "highlight.js/styles/github.css";
 import { MdClose, MdDownload, MdFileDownload, MdOutlineDownload, MdOutlineFileDownload } from "react-icons/md";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import CodeGenBlock from "./CodeFormat";
+import { loggers } from "../utils/loggers";
 
 // hljs.registerLanguage('json', json);
 // hljs.registerLanguage('html', html);
@@ -54,7 +47,7 @@ function ResizeBar({}){
 //     }
 //     catch (e){
 //         // Formatter may throw an error... Can't trust formatters with incomplete docs!
-//         console.log("[HARAMBE_SAY] Harambe think something wrong...", code_modified, e)
+//         loggers.detail_modal("[HARAMBE_SAY] Harambe think something wrong...", code_modified, e)
 //     }
 
 //     return <HighlightBlock data={code_modified}></HighlightBlock>
@@ -115,8 +108,9 @@ const columns = [
  */
 function SmartBodyPreview({data, type}){
     // let content = ""
-
-    // console.log("[HARAMBE TYPE] Type ==", type)
+    
+    loggers.detail_modal(data)
+    // loggers.detail_modal("[HARAMBE TYPE] Type ==", type)
     if (type == "headers"){
         let headerTable = useReactTable({
             columns:columns,
@@ -159,14 +153,14 @@ function SmartBodyPreview({data, type}){
        let postContent = data?.postData?.text
        
        
-       // console.log(isResponse, "is response", data, data.postData)
+       // loggers.detail_modal(isResponse, "is response", data, data.postData)
        if (isResponse){
            /**
             * @type {HARContent}
            */
           let content = data.content
           
-          console.log(content.text, "content")
+          loggers.detail_modal(content.text, "content")
           if (content.mimeType.startsWith("image/")){
                 return <img 
                 style={{width:"100%", borderRadius:"10px"}} 
@@ -189,17 +183,18 @@ function SmartBodyPreview({data, type}){
                     </div>
                 </>
             }
+            loggers.detail_modal("fallback is Codegenblock...", data)
             return <CodeGenBlock code={content?.text}></CodeGenBlock>
         }
 
         else{
-            console.log("Request ting", postContent != undefined, data?.postData?.text )
+            loggers.detail_modal("Request ting", postContent != undefined, data?.postData?.text)
             if (postContent != undefined){
                 // postContent.text
-                console.log("POST CONTENT!!", postContent)
+                loggers.detail_modal("POST CONTENT!!", postContent)
                 return <CodeGenBlock code={postContent}></CodeGenBlock>
             }
-            return <CodeGenBlock code={"<empty>"}></CodeGenBlock>
+            return <CodeGenBlock code={postContent}></CodeGenBlock>
         }
     }
     // else {

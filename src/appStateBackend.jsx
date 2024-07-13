@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { argbFromHex, Hct, hexFromArgb, SchemeFidelity, SchemeTonalSpot, SchemeVibrant, themeFromSourceColor, TonalPalette,  } from '@material/material-color-utilities';
+import { loggers } from "./utils/loggers";
 
 export const defaultColor = "#867cff"
 const docDefault = localStorage.getItem('color') ?? defaultColor
@@ -29,7 +30,7 @@ export const AppStateProvider = ({ children }) => {
 
   let themeOverride = undefined
   const setPreference = (preference) => {
-    console.log(preference, "is the new Theme.")
+    loggers.appstate(preference, "is the new Theme.")
     localStorage.setItem('preference', preference)
     setPreference_core(preference)
     themeOverride = preference == "dark"
@@ -42,7 +43,7 @@ export const AppStateProvider = ({ children }) => {
     let m3ThemeJSON = new SchemeFidelity(Hct.fromInt(argbFromHex(seed)), themeOverride ?? dark, 0)
     seedColor = seed;
     localStorage.setItem('color', seed)
-    console.log(preference)
+    loggers.appstate(preference)
     setTheme(m3ThemeJSON);
   }
   return (

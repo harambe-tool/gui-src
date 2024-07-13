@@ -13,6 +13,7 @@ import fingerprintClassifier from '../utils/classifiers';
 
 import uuidvalidator from "uuid-validate"
 import { isNumeric } from '../utils/validators';
+import { loggers } from '../utils/loggers';
 
 let initiators = {}
 let initiatorIndexes = [];
@@ -272,7 +273,7 @@ function Viewer_providerless() {
             entryClone["_data"] = classified.data
             entryClone["_initiator_harambe"] = classified.initiator
             if (entryClone["_type"] == "apiRequest_core") {
-                console.log("Building path from", entry.request.url)
+                loggers.viewer_algos("Building path from", entry.request.url)
                 buildDescendingPath(entry, index)
                 // decomposedPaths[fullPath][ending] = true
             }
@@ -302,11 +303,11 @@ function Viewer_providerless() {
         let extraNodes = []
 
         if (filter == "apiRequest_core") {
-            console.log(filter, "Filtering by API request")
+            loggers.viewer_algos(filter, "Filtering by API request (internal)")
 
             extraNodes = decomposedPaths.map((pathObject) => {
                 let currentID = `${pathObject.id}-slug`
-                console.log(pathObject)
+                loggers.viewer_algos(pathObject)
                 let data = {
                     id: currentID,
                     type: "api_path",
@@ -328,7 +329,7 @@ function Viewer_providerless() {
 
                 return data;
             })
-            console.log("Extra Nodes:", extraNodes)
+            loggers.viewer_algos("Extra Nodes:", extraNodes)
         }
 
         values = values.map((entry, index) => {
@@ -356,13 +357,13 @@ function Viewer_providerless() {
                 let simplePath = (url.hostname + url.pathname)
 
                 const poppedPath = simplePath.split("/").slice(0, -1).join("/")
-                console.log(poppedPath)
+                loggers.viewer_algos(poppedPath)
                 const searchResult = decomposedPaths.find((value) => poppedPath == value.path)
-                console.log(poppedPath, "has a ", searchResult)
+                loggers.viewer_algos(poppedPath, "has a ", searchResult)
                 const parent = searchResult?.id ?? "orphan"
                 const edgeId = `${parent}-slug`
                 if (parent != "orphan")
-                    console.log(`${poppedPath} has a parent slug! `, edgeId, searchResult.path)
+                    loggers.viewer_algos(`${poppedPath} has a parent slug! `, edgeId, searchResult.path)
                 layout.setEdge(`${parent}-slug`, index_str)
             }
             else {
@@ -408,7 +409,7 @@ function Viewer_providerless() {
     }, [filter])
     // return { ...node, position: { x, y } };
 
-    console.log(edges)
+    // console.log(edges)
 
     if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) nodes[Number(selectedNode.id)].selected = true;
 

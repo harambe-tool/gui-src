@@ -14,6 +14,8 @@
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@material/material-color-utilities": "^0.3.0",
     "@tanstack/react-table": "^8.19.2",
+    "buffer": "^6.0.3",
+    "esthetic": "^0.6.4-beta.1",
     "highlight.js": "^11.9.0",
     "js-base64": "^3.7.7",
     "react": "^18.2.0",
@@ -25,7 +27,6 @@
     "react-resizable-panels": "^2.0.20",
     "react-router-dom": "^6.23.1",
     "reactflow": "^11.11.3",
-    "esthetic": "^0.6.4-beta.1",
     "uuid-validate": "^0.0.3"
   },
   "devDependencies": {
@@ -36,7 +37,6 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
-    
     "vite": "^5.2.0"
   }
 }

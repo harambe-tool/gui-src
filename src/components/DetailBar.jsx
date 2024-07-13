@@ -3,6 +3,7 @@ import "./DetailBar.css"
 import "./../pages/HARTypes"
 import { decomposedPaths } from "../pages/Viewer"
 import { details } from "../utils/classifiers"
+import { loggers } from "../utils/loggers"
 
 function subBuilder(index,subheader,content){
     return <>
@@ -121,14 +122,15 @@ let datadescs = {
  * @returns 
  */
 function DetailBar_core({log}){
-    console.log(log)
+    
+    loggers.detail_bar(log)
     const type = log["_type"]
     /**
      * @type {import("../pages/Viewer").Data}
      */
     const data = log["_data"]
 
-    console.log(data)
+    loggers.detail_bar(data)
 
     return <div className="detail-bar-container">
         <div className="detail-bar">
@@ -180,7 +182,7 @@ function DetailBar_core({log}){
  * @returns 
  */
 function DetailBar_core_slug({data}){
-    console.log(decomposedPaths);
+    loggers.detail_bar(decomposedPaths);
     // FOr viewing Slug entries
     return <div className="detail-bar-container">
         <div className="detail-bar">
@@ -223,7 +225,7 @@ function DetailBar_core_slug({data}){
 }
 
 // function DetailBar_core_slug({data}){
-//     console.log(decomposedPaths);
+//     loggers.detail_bar(decomposedPaths);
 //     // FOr viewing Slug entries
 //     let children = decomposedPaths.filter((path)=>path.path.startsWith(data.path))
 
@@ -244,9 +246,9 @@ function DetailBar_core_slug({data}){
 //             <div>
 //                 {children.map((path, index, arr)=>{
 //                     let snippedPath = path.path.replace(data.path,"");
-//                     // console.log(arr)
+//                     // loggers.detail_bar(arr)
 //                     let text = snippedPath.startsWith(arr[index-1]?.path) ? snippedPath.replace(arr[index-1]?.path,"-".repeat(arr[index-1].path.length)) : snippedPath
-//                     console.log(text)
+//                     loggers.detail_bar(text)
 //                     let textualized = textualChild(text)
 //                     return <span style={{fontSize:".6em"}} key={path.id}>
 //                         {path.isID ? <b>{textualized}</b> : textualized}
@@ -260,6 +262,6 @@ function DetailBar_core_slug({data}){
 export default function DetailBar({log}){
     if (!log) return <div></div>
     let isSlug = Object.keys(log).every((val)=>["id","label","path", "isID"].includes(val))
-    console.log(isSlug,  Object.keys(log));
+    loggers.detail_bar(isSlug,  Object.keys(log));
     return <div className="contain-bar">{isSlug ?  <DetailBar_core_slug data={log}> </DetailBar_core_slug> : <DetailBar_core log={log}/>}</div>
 }

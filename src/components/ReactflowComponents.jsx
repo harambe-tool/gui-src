@@ -7,6 +7,7 @@ import { MdDataObject } from "react-icons/md";
 import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
 import "highlight.js/styles/github.css";
+import { loggers } from '../utils/loggers';
 
 hljs.registerLanguage('json', json);
 
@@ -142,7 +143,7 @@ function CodeGenBlock({code}){
   try {
     prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
   } catch (error) {
-    console.log(error)
+    loggers.error(loggers.components, error)
   }
   // prettifiedJSON = JSON.stringify(JSON.parse(code), null, 2)
   let code_formatted = hljs.highlight(prettifiedJSON, {language: "json"}).value
