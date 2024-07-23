@@ -129,6 +129,32 @@
  */
 
 /**
+ * This object represents the root of exported data, as needed for Harambe.
+ * @typedef {object} HARLog_Harambe
+ * @property {HARVersion} version - Version number of the format
+ * @property {HARCreator} creator - Name and version info of the log [creator](#creator) application
+ * @property {HARBrowser} [browser] - Name and version info of used [browser](#browser)
+ * @property {HARPage[]} [pages] - List of all exported (tracked) [pages](#pages)
+ * @property {HAREntry_Harambe[]} entries - List of all exported (tracked) [requests](#entries)
+ * @property {HARComment} [comment] - *(new in 1.2)* - A comment provided by the user or the application
+ * @example {
+  "version": "1.2",
+  "creator": {
+    "name": "Firebug",
+    "version": "1.6"
+  },
+  "browser": {
+    "name": "Firefox",
+    "version": "3.6"
+  },
+  "pages": [],
+  "entries": [],
+  "comment": ""
+}
+ */
+
+
+/**
  * @typedef {object} HARCreator
  * @property {string} name - Name of the application used to export the log
  * @property {string} version - Version of the application used to export the log
@@ -244,6 +270,69 @@
   "comment": ""
 }
  */
+
+
+/**
+ * This object represents an array with all exported HTTP requests. Sorting entries by `startedDateTime` (starting from the oldest) is preferred way how to export data since it can make importing faster. However the reader application should always make sure the array is sorted (if required for the import).
+ * @typedef {object} HAREntry_Harambe
+ * @property {HARPageId} [pageref] - Unique Reference to the parent page
+ * @property {HARDateTimeISO8601} startedDateTime - Date and time stamp of the request start ([`ISO 8601`][iso-8601])
+ * @property {number} time - Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including `-1` values)
+ * @property {HARRequest} request - Detailed info about the request
+ * @property {HARResponse} response - Detailed info about the response
+ * @property {HARCache} cache - Info about cache usage
+ * @property {HARTimings} timings - Detailed timing info about request/response round trip
+ * @property {HARServerIpAddress} [serverIPAddress] - *(new in 1.2)* - IP address of the server that was connected (result of DNS resolution)
+ * @property {HARConnectionId} [connection] - *(new in 1.2)* - Unique ID of the parent TCP/IP connection, can be the client or server port number.
+ * @property {HARComment} [comment] - *(new in 1.2)* - A comment provided by the user or the application
+ * @property {string} id - [NOT IN SPEC] unique identifier as `connection` is not actually unique
+* @example {
+  "pageref": "page_0",
+  "startedDateTime": "2009-04-16T12:07:23.596Z",
+  "time": 50,
+  "request": {
+    "method": "GET",
+    "url": "http://www.example.com/path/?param=value",
+    "httpVersion": "HTTP/1.1",
+    "cookies": [],
+    "headers": [],
+    "queryString": [],
+    "postData": {},
+    "headersSize": 150,
+    "bodySize": 0
+  },
+  "response": {
+    "status": 200,
+    "statusText": "OK",
+    "httpVersion": "HTTP/1.1",
+    "cookies": [],
+    "headers": [],
+    "content": {
+      "size": 33,
+      "compression": 0,
+      "mimeType": "text/html; charset=utf-8",
+      "text": "\n"
+    },
+    "redirectURL": "",
+    "headersSize": 160,
+    "bodySize": 850
+  },
+  "cache": {},
+  "timings": {
+    "blocked": 0,
+    "dns": -1,
+    "connect": 15,
+    "send": 20,
+    "wait": 38,
+    "receive": 12,
+    "ssl": -1
+  },
+  "serverIPAddress": "10.0.0.1",
+  "connection": "52492",
+  "comment": ""
+}
+ */
+
 
 /**
  * This object contains detailed info about performed request.

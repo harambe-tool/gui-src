@@ -22,11 +22,36 @@ export const AppStateContext = createContext({
 });
 let seedColor = docDefault;
 export const AppStateProvider = ({ children }) => {
-  const [harContent, setHarContent] = useState(null);
+  const [harContent, setHarContent_core] = useState(null);
   const [serverURL, setServerURL] = useState("");
   const [preference, setPreference_core] = useState(localStorage.getItem('preference')  ?? "dark")
   const dark = preference == "dark"
   const [theme, setTheme] = useState(new SchemeFidelity(Hct.fromInt(argbFromHex(docDefault)), dark, 0))
+
+  const [highlightedNodes, setHighlighted] = useState({})
+
+
+  // -- Middleware --
+
+  /**
+   * Original HAR Log, untouched by Harambe middleware
+   * @param {HARLog} har_original 
+   */
+  let setHarContent = (har_original)=>{
+
+    /**
+     * @type {HARLog_Harambe}
+     */
+    let har_modified = har_original;
+    
+    // `connection` in spec claims to be unique - it is NOT(!!) unique in the sense that it'll be a unique identifier!!
+    har_modified.log.entries = har_original.log.entries.map((entry, index)=>{
+      return {...entry, id:index.toString()}
+    })
+    console.log(har_modified)
+
+    setHarContent_core(har_modified)
+  }
 
   let themeOverride = undefined
   const setPreference = (preference) => {
@@ -36,8 +61,6 @@ export const AppStateProvider = ({ children }) => {
     themeOverride = preference == "dark"
     setThemeMiddleware(seedColor)
   }
-
-
 
   const setThemeMiddleware = (seed)=>{
     let m3ThemeJSON = new SchemeFidelity(Hct.fromInt(argbFromHex(seed)), themeOverride ?? dark, 0)

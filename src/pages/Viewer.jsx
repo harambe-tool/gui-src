@@ -217,7 +217,6 @@ const nodeTypes = {
 
 function Viewer_providerless() {
     let { harContent } = useContext(AppStateContext)
-
     if (harContent == null) return location.replace("/")
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
@@ -231,9 +230,10 @@ function Viewer_providerless() {
     window["filter"] = filter
     let instance = useReactFlow()
     /**
-     * @type {HARLog}
+     * @type {HARLog_Harambe}
     */
     let log = harContent["log"];
+    console.log(log)
 
     let keywords = log.pages.flatMap((page) => new URL(page.title).hostname.split(".").slice(0, -1))
     // console.log(keywords)
@@ -293,13 +293,14 @@ function Viewer_providerless() {
 
     const findInitiator = (initiator) => {
         let initiatorIndex = log.entries.findIndex(entry => entry?.request?.url == initiator)
-        return initiatorIndex == -1 ? "orphan" : initiatorIndex.toString()
+        return initiatorIndex == -1 ? "orphan" : log.entries[initiatorIndex].id
     }
+
     /**
+     * This is where we begin processing 
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
     let { nodes, edges } = useMemo(() => {
-
         let toplevel_parentID = "";
         layout = new Dagre.graphlib.Graph()
         layout.setGraph({ rankdir: "TB" });
@@ -312,6 +313,8 @@ function Viewer_providerless() {
         if (filter == "apiRequest_core") {
             loggers.viewer_algos(filter, "Filtering by API request (internal)")
 
+            // PARSE SLUGS
+            // TODO: Compatibility with new system 
             extraNodes = decomposedPaths.map((pathObject) => {
                 let currentID = `${pathObject.id}-slug`
                 loggers.viewer_algos(pathObject)
@@ -340,15 +343,14 @@ function Viewer_providerless() {
         }
 
         values = values.map((entry, index) => {
-            // this'll fail horribly during filters right?
-            // console.log(highlightedNodes)
-            let highlighted = highlightedNodes[index] ?? false
-            console.log(highlightedNodes)
+            let ID = entry.id
+            let highlighted = highlightedNodes[ID] ?? false
+            console.log(entry, ID)
             /**
              * @type {import('reactflow').Node}
              */
             let data = {
-                id: index.toString(),
+                id: ID,
                 type: entry["_type"],
                 data: {...entry, highlighted:highlighted},
                 // highlighted: highlighted,
@@ -361,8 +363,7 @@ function Viewer_providerless() {
             if (filter == "apiRequest_core"){
 
             }
-            let index_str = index.toString()
-            layout.setNode(index_str, data)
+            layout.setNode(ID, data)
 
 
             // Find initiator in list with .filter()
@@ -379,11 +380,11 @@ function Viewer_providerless() {
                 const edgeId = `${parent}-slug`
                 if (parent != "orphan")
                     loggers.viewer_algos(`${poppedPath} has a parent slug! `, edgeId, searchResult.path)
-                layout.setEdge(`${parent}-slug`, index_str)
+                layout.setEdge(`${parent}-slug`, ID)
             }
             else {
                 let initiatorID = findInitiator(entry["_initiator_harambe"])
-                layout.setEdge(initiatorID, index_str)
+                layout.setEdge(initiatorID, ID)
             }
             return data
         })
@@ -392,12 +393,14 @@ function Viewer_providerless() {
         values = [...values, ...extraNodes]
 
         Dagre.layout(layout);
+        
         let nodes = []
         let edges = []
 
         // TODO: See if this whole memoized function can be optimized
         values.map((entry, index) => {
             const { x, y, width, height } = layout.node(entry.id); //i think i assigned an incorrect type to Values...
+            // console.log(entry, x, y)
             nodes.push({
                 position: {
                     x: x - width / 2,
@@ -497,7 +500,7 @@ function Viewer_providerless() {
 
 
 export default function Viewer() {
-
+    // This way, even the topbars have Reactflow hooks.  
     return <ReactFlowProvider>
         <Viewer_providerless></Viewer_providerless>
     </ReactFlowProvider>
