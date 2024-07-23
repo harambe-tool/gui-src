@@ -83,7 +83,7 @@ function Filter({filterSetter}) {
  * @param {{selectedNode :  import("reactflow").Node<any, string | undefined> | undefined}} param0 
  * @returns 
  */
-export default function TopBar({selectedNode, filterSetter}){
+export default function TopBar({selectedNode, filterSetter, highlightedNodes, setHighlightedNodes}){
 
     // let instance = useReactFlow()
     
@@ -94,7 +94,6 @@ export default function TopBar({selectedNode, filterSetter}){
     let isSlug = false
     if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path", "isID"].includes(val))
     let [activeModal, setActiveModal] = useState("") 
-
     /**
      * @type {HAREntry}
      */
@@ -103,6 +102,18 @@ export default function TopBar({selectedNode, filterSetter}){
 
     let hideAction = () => setActiveModal("")
     let modal = <></>
+
+    function highlightHandler(){
+      // The proper way to do this is to create a context of all highlighted things and then let the component manage its own highlighting
+      // TODO: Rewrite this in a less hacky way
+      let modded = Object.assign({}, highlightedNodes); //Avoid mutating the state (can also just destructure but this way is nicer, albeit lacking in performance)
+      console.log(modded, selectedNode.id)
+      let highlighted = modded[Number(selectedNode.id)];
+      modded[selectedNode.id] = !highlighted;
+      console.log("Highlights:", modded)
+      setHighlightedNodes(modded)
+
+    }
     switch (activeModal) {
       case "details":
         modal = <DetailModal hide={hideAction} data={data}></DetailModal>
@@ -114,7 +125,7 @@ export default function TopBar({selectedNode, filterSetter}){
     return <div className='topbar '>
         <div className='left'>
             <button tabIndex={0} disabled={!isActive} onClick={() => setActiveModal("details")}>Details</button>
-            <button tabIndex={1} disabled={!isActive}>Highlight</button>
+            <button tabIndex={1} disabled={!isActive} onClick={() => highlightHandler()}>Highlight</button>
             <button tabIndex={2} disabled={!isActive}>Show Similar</button>
             <button tabIndex={3} disabled={!isActive}>Initiators</button>
         </div>

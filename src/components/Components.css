@@ -11,6 +11,11 @@
     /* border:2px solid rgba(134, 124, 255, 0.1); */
 }
 
+.card.highlighted {
+    outline:2px solid var(--tertiary) !important;
+    outline-offset:2px;
+}
+
 .card.image {
     outline:1px solid oklch(0.66 0.19 345.4 / 1) ;
     display:flex;
@@ -90,4 +95,53 @@ span.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo {
 .card.api_path b {
     text-shadow: 1px 1px var(--inversePrimary);
     font-size:1.1em;
+}
+
+.card-actions {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.card-actions > div {
+    z-index:999;
+    border: 1px solid var(--primary);
+    padding: .25em;
+    display:flex;
+    position:relative;
+    bottom:2em;
+    background: var(--surfaceContainerLowest);
+    /* margin-bottom:1em; */
+    /* margin-left:1em; */
+    border-radius: 5px;
+}
+
+.action {
+    padding: .25em;
+    cursor: pointer;
+    display:flex;
+    position:relative;
+}
+
+.action > .tooltip {
+    display:none;
+}
+
+.action:hover > .tooltip {
+    position:absolute;
+    display:block;
+    width:max-content;
+    left:1.5em;
+    top:1.5em;
+    background:var(--surface);
+    border:1px solid var(--onBackground);
+    padding:2px;
+    padding-inline:.25em;
+    font-size:.75em;
+    border-radius:4px
+    /* content:"Datta"; */
+
+    /* padding: .25em; */
+    /* cursor: pointer; */
 }

@@ -18,6 +18,8 @@ import { loggers } from '../utils/loggers';
 let initiators = {}
 let initiatorIndexes = [];
 
+let nodes_global = []
+
 const trackers = [
     "https://www.google-analytics.com/g/collect",
     "https://www.google-analytics.com/j/collect",
@@ -221,7 +223,12 @@ function Viewer_providerless() {
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
     */
     let [selectedNode, setSelectedNode] = useState(null);
+    // contains a map of all IDs that are highlighted with a bool
+    let [highlightedNodes, setHighlightedNodes_core] = useState({});
+
+    let setHighlightedNodes = (newState) => {setHighlightedNodes_core(newState)}
     let [filter, setFilter] = useState("all");
+    window["filter"] = filter
     let instance = useReactFlow()
     /**
      * @type {HARLog}
@@ -333,18 +340,26 @@ function Viewer_providerless() {
         }
 
         values = values.map((entry, index) => {
+            // this'll fail horribly during filters right?
+            // console.log(highlightedNodes)
+            let highlighted = highlightedNodes[index] ?? false
+            console.log(highlightedNodes)
             /**
              * @type {import('reactflow').Node}
              */
             let data = {
                 id: index.toString(),
                 type: entry["_type"],
-                data: entry,
+                data: {...entry, highlighted:highlighted},
+                // highlighted: highlighted,
                 focusable: true,
                 ...mapToDimension(entry["_type"]),
                 // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
                 // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
                 // rank: entry["_type"] == "media" ? 3 : 2 
+            }
+            if (filter == "apiRequest_core"){
+
             }
             let index_str = index.toString()
             layout.setNode(index_str, data)
@@ -372,6 +387,8 @@ function Viewer_providerless() {
             }
             return data
         })
+
+       // nodes[]
         values = [...values, ...extraNodes]
 
         Dagre.layout(layout);
@@ -407,6 +424,14 @@ function Viewer_providerless() {
         return { nodes, edges };
 
     }, [filter])
+    // console.log("Re rendering ting")
+    Object.keys(highlightedNodes).map((nodeId)=>{
+        console.log("highlighted nodes", highlightedNodes, nodeId)
+        // console.log("Highlighting", highlightedNodes, nodeId, nodes[nodeId])
+        if (nodes[Number(nodeId)])nodes[Number(nodeId)].data.highlighted = highlightedNodes[nodeId]
+        // console.log("Highlighted", highlightedNodes, nodeId, nodes[nodeId])
+    })
+    
     // return { ...node, position: { x, y } };
 
     // console.log(edges)
@@ -423,7 +448,7 @@ function Viewer_providerless() {
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
 
             <div className='barHolder'>
-                <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
+                <TopBar highlightedNodes={highlightedNodes} setHighlightedNodes={setHighlightedNodes} filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
             </div>
             <ReactFlow
@@ -435,7 +460,7 @@ function Viewer_providerless() {
                 proOptions={{ hideAttribution: true }}
                 edges={customEdges}
                 nodes={nodes}
-                onlyRenderVisibleElements={true}
+                // onlyRenderVisibleElements={true}
                 connectOnClick={false}
                 defaultEdgeOptions={{ focusable: false, deletable: false, updatable: false }}
                 nodesConnectable={false}
