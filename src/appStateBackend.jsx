@@ -15,6 +15,8 @@ export const AppStateContext = createContext({
   serverURL: "",
   preference: prefs,
   theme:{},
+  highlightedNodes:{},
+  setHighlightedNodes:()=>{},
   setHarContent: (content) => {},
   setServerURL: (url) => {},
   setTheme: (theme) => {},
@@ -28,7 +30,7 @@ export const AppStateProvider = ({ children }) => {
   const dark = preference == "dark"
   const [theme, setTheme] = useState(new SchemeFidelity(Hct.fromInt(argbFromHex(docDefault)), dark, 0))
 
-  const [highlightedNodes, setHighlighted] = useState({})
+  const [highlightedNodes, setHighlightedNodes] = useState({})
 
 
   // -- Middleware --
@@ -79,7 +81,9 @@ export const AppStateProvider = ({ children }) => {
         setHarContent,
         setServerURL,
         setTheme:setThemeMiddleware,
-        setPreference
+        setPreference,
+        highlightedNodes, 
+        setHighlightedNodes
       }}
     >
       {children}

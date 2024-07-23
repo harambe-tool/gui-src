@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { Handle, Position } from 'reactflow';
 const handleStyle = { left: 10 };
 import "./Components.css"
@@ -8,6 +8,7 @@ import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
 import "highlight.js/styles/github.css";
 import { loggers } from '../utils/loggers';
+import { AppStateContext } from '../appStateBackend';
 
 hljs.registerLanguage('json', json);
 
@@ -63,21 +64,25 @@ function ActionCards(){
 }
 
 function CardCore(props){
+  let { highlightedNodes } = useContext(AppStateContext)
+
   // console.log(props)
+  let id = props.fullprops.data.id
   let dimensions = mapToDimension(props.type)
   // props.highlighted
   let selected = props.selected;
+  let highlighted = highlightedNodes[id] ?? false; 
   if (selected) console.log("PROPS FROM CARD ", props?.fullprops?.data)
   let visible = window["filter"] == "apiRequest_core" && selected;
   return (
     <>
       {visible && <ActionCards />}
-      <div className={`card ${props.className} ${props.selected ? "selected" : ""} ${props.fullprops.data.highlighted == true ? "highlighted" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
+      <div className={`card ${props.className} ${props.selected ? "selected" : ""} ${highlighted ? "highlighted" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
         
         {props.children}
       </div>
-      <Handle type="source" position={Position.Bottom} id={props.id+"-source"}/>
-      <Handle type="target" position={Position.Top} id={props.id+"-target"} />
+      <Handle type="source" position={Position.Bottom} id={id+"-source"}/>
+      <Handle type="target" position={Position.Top} id={id+"-target"} />
 
 
     </>

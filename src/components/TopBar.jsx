@@ -1,10 +1,11 @@
 import { useReactFlow } from "reactflow"
 import "./TopBar.css"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import DetailModal from "./DetailModal";
 import "./Modal.css"
 import { ModalContainer } from "./Modal";
 import { loggers } from "../utils/loggers";
+import { AppStateContext } from "../appStateBackend";
 
 // TODO: LATER - One day, add an input for filtering. Until then, we'll have a mix and match approach to filtering
 // TODO: Now - work on dropdown for resource types to show
@@ -83,7 +84,7 @@ function Filter({filterSetter}) {
  * @param {{selectedNode :  import("reactflow").Node<any, string | undefined> | undefined}} param0 
  * @returns 
  */
-export default function TopBar({selectedNode, filterSetter, highlightedNodes, setHighlightedNodes}){
+export default function TopBar({selectedNode, filterSetter}){
 
     // let instance = useReactFlow()
     
@@ -91,6 +92,7 @@ export default function TopBar({selectedNode, filterSetter, highlightedNodes, se
     // let nodes = instance.getNodes()
     // let selectedNode = nodes.filter(node => node.selected)[0]
     loggers.topbar(selectedNode)
+    let {highlightedNodes, setHighlightedNodes} = useContext(AppStateContext)
     let isSlug = false
     if (selectedNode) isSlug = Object.keys(selectedNode.data).every((val)=>["id","label","path", "isID"].includes(val))
     let [activeModal, setActiveModal] = useState("") 
@@ -104,14 +106,10 @@ export default function TopBar({selectedNode, filterSetter, highlightedNodes, se
     let modal = <></>
 
     function highlightHandler(){
-      // The proper way to do this is to create a context of all highlighted things and then let the component manage its own highlighting
-      // TODO: Rewrite this in a less hacky way
-      let modded = Object.assign({}, highlightedNodes); //Avoid mutating the state (can also just destructure but this way is nicer, albeit lacking in performance)
-      console.log(modded, selectedNode.id)
-      let highlighted = modded[Number(selectedNode.id)];
-      modded[selectedNode.id] = !highlighted;
-      console.log("Highlights:", modded)
-      setHighlightedNodes(modded)
+      let new_state = Object.assign({}, highlightedNodes); //Avoid mutating the state (can also just destructure but this way is nicer, albeit lacking in performance)
+      if (new_state[selectedNode.id] == undefined) new_state[selectedNode.id] = true
+      else {new_state[selectedNode.id] = !new_state[selectedNode.id]}
+      setHighlightedNodes(new_state)
 
     }
     switch (activeModal) {

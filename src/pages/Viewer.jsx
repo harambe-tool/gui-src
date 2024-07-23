@@ -220,13 +220,10 @@ function Viewer_providerless() {
     if (harContent == null) return location.replace("/")
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
-    */
+     */
     let [selectedNode, setSelectedNode] = useState(null);
-    // contains a map of all IDs that are highlighted with a bool
-    let [highlightedNodes, setHighlightedNodes_core] = useState({});
-
-    let setHighlightedNodes = (newState) => {setHighlightedNodes_core(newState)}
     let [filter, setFilter] = useState("all");
+
     window["filter"] = filter
     let instance = useReactFlow()
     /**
@@ -288,7 +285,6 @@ function Viewer_providerless() {
             // console.log(entry)
         })
     },[])
-    // console.log(decomposedPaths)
 
 
     const findInitiator = (initiator) => {
@@ -344,7 +340,6 @@ function Viewer_providerless() {
 
         values = values.map((entry, index) => {
             let ID = entry.id
-            let highlighted = highlightedNodes[ID] ?? false
             console.log(entry, ID)
             /**
              * @type {import('reactflow').Node}
@@ -352,8 +347,7 @@ function Viewer_providerless() {
             let data = {
                 id: ID,
                 type: entry["_type"],
-                data: {...entry, highlighted:highlighted},
-                // highlighted: highlighted,
+                data: entry,
                 focusable: true,
                 ...mapToDimension(entry["_type"]),
                 // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
@@ -427,13 +421,6 @@ function Viewer_providerless() {
         return { nodes, edges };
 
     }, [filter])
-    // console.log("Re rendering ting")
-    Object.keys(highlightedNodes).map((nodeId)=>{
-        console.log("highlighted nodes", highlightedNodes, nodeId)
-        // console.log("Highlighting", highlightedNodes, nodeId, nodes[nodeId])
-        if (nodes[Number(nodeId)])nodes[Number(nodeId)].data.highlighted = highlightedNodes[nodeId]
-        // console.log("Highlighted", highlightedNodes, nodeId, nodes[nodeId])
-    })
     
     // return { ...node, position: { x, y } };
 
@@ -451,7 +438,7 @@ function Viewer_providerless() {
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
 
             <div className='barHolder'>
-                <TopBar highlightedNodes={highlightedNodes} setHighlightedNodes={setHighlightedNodes} filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
+                <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
             </div>
             <ReactFlow
