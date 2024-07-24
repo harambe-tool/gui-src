@@ -8,17 +8,11 @@ import { APIBlock, AnalyticsBlock, ApiPath, HARBase, HARImage, customWidthMappin
 import DetailBar from '../components/DetailBar';
 import Dagre from '@dagrejs/dagre';
 import TopBar from '../components/TopBar';
-import { useNavigate } from 'react-router-dom';
 import fingerprintClassifier from '../utils/classifiers';
 
 import uuidvalidator from "uuid-validate"
 import { isNumeric } from '../utils/validators';
 import { loggers } from '../utils/loggers';
-
-let initiators = {}
-let initiatorIndexes = [];
-
-let nodes_global = []
 
 const trackers = [
     "https://www.google-analytics.com/g/collect",
@@ -40,18 +34,15 @@ const trackers = [
     "https://tr.snapchat.com/p",
     "https://api.realytics.io/event/track?cb="
 ]
-function isAnalytics(url) {
-    return trackers.some(tracker => url.includes(tracker))
-}
+const isAnalytics = (url) => trackers.some(tracker => url.includes(tracker))
 /**
  * Classifier - currently only classifies and groups initiators
  * @param {HAREntry} entry 
  * @param {number} index_any 
  * @param {string} pageref 
  */
-function classifier(entry, index_any, internalPredicate) {
+function classifier(entry, internalPredicate) {
 
-    let data = [];
     let type = "harBase"
     // Store the initiator. This isn't in spec, but it's gonna be in the HAR file. Only tested for Chrome devtool HARs.
     const initiator = entry["_initiator"]
@@ -68,73 +59,16 @@ function classifier(entry, index_any, internalPredicate) {
         case "preflight":
             initiatorURL = initiator?.url
             break;
-        // case "xhr":
-        // initiatorURL = initiator?.url
-        // break;
     }
     if (initiator?.stack?.callFrames == []) {
-        initiatorURL = initiator?.stack?.parent?.callFrames?.at(0)?.url
+        initiatorURL = initiator?.stack?.parent?.callFrames?.at(0)?.url // Just nab the first initiator
     }
-    // let index = Number(index_any)
     initiatorURL ??= "orphan"
-    // initiators[index] = initiatorURL
-    // console.log(initiators)
+
     let coreURL = new URL(entry.request.url).hostname.split(".");
     let isInternal = internalPredicate(coreURL)
 
-    //TODO: Implement https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html (and credit it)
-    const classificationMap = {
-        "amz": entry.response?.headers?.includes("x-amz-request-id"),
-        "form": entry.request?.postData?.mimeType?.startsWith("application/x-www-form-urlencoded"),
-        "csrf": entry.response?.headers?.includes("x-csrf-token"),
-        "ratelimit": entry.response?.headers?.includes("x-ratelimit-limit"),
-        "requestid": entry.request?.headers?.includes("x-request-id"),
-        "correlationid": entry.request?.headers?.includes("x-correlation-id"),
-        "apikey": entry.request?.headers?.includes("x-api-key"),
-
-    }
-
     let dataToBeProcessed = fingerprintClassifier(entry.request.headers, entry.response.headers)
-    // console.log(dataToBeProcessed)
-    // Object.entries
-    // }
-    // if (entry.response.headers.includes("x-amz-request-id")){
-    //     data["amz"] = true // Uses AWS
-    // }
-    // if (entry.request.method == "POST" && entry.request.postData.mimeType == "application/x-www-form-urlencoded") {
-    //     data["form"] = true // Uses forms
-    // }
-    // if (entry.request.headers.includes("x-csrf-token")) {
-    //     data["csrf"] = true // Uses CSRF
-    // }
-    // if (entry.response.headers.includes("x-ratelimit-limit")) {
-    //     data["ratelimit"] = true // Uses rate limiting
-    // }
-    // if (entry.response.headers.includes("x-request-id")) {
-    //     data["requestid"] = true // Uses request IDs
-    // }
-    // if (entry.response.headers.includes("x-correlation-id")) {
-    //     data["correlationid"] = true // Will be useful ofr tracking requests in Harambe - TODO!
-    // }
-    // if (entry.response.headers.includes("x-api-key")) {
-    //     data["apikey"] = true // Might be useful
-    // }
-    // if (entry.response.headers.includes("x-access-token")) {
-    //     data["accesstoken"] = true // Could contain useful JWTs?
-    // }
-    // if (entry.response.headers.includes("x-auth-token")) {
-    //     data["authtoken"] = true // Uses auth tokens
-    // }
-    // if (entry.response.headers.includes("authorization")) {
-    //     data["authorization"] = true // Uses authorization headers
-    // }
-    // if (entry.response.headers.includes("x-client-id")) {
-    //     data["clientid"] = true // Uses client IDs
-    // }
-    // if (entry.response.headers.includes("x-user-id")) {
-    //     data["userid"] = true // Uses user IDs
-    // }
-
 
     type = "harBase"
     switch (entry["_resourceType"]) {
@@ -144,24 +78,16 @@ function classifier(entry, index_any, internalPredicate) {
         case "script":
             type = isInternal ? "hostedAsset" : "cdnAsset"
     }
-    if (entry.response.content.mimeType.startsWith("image/") || entry.response.content.mimeType.startsWith("svg+xml")) {
-        type = "media"
-    }
-    // console.log(entry.request.url)
-    if (isAnalytics(entry.request.url)) {
-        type = "analytics_endpoint"
-    }
 
-    // console.log(entry.response.content.mimeType.startsWith("application/json"), internalPredicate(coreURL))
-    if (isInternal && (entry.response.content.mimeType.startsWith("application/json") || entry?.request?.method == "POST")) {
-        type = "apiRequest_core"
-    }
+    if (entry.response.content.mimeType.startsWith("image/") ||
+      entry.response.content.mimeType.startsWith("svg+xml")) type = "media";
 
-    // if (entry.response.content.mimeType.startsWith("text/javascript")){
-    //     entry["_type"] = isInternal ? "hostedAsset" : "cdnAsset" 
-    // }
-    // console.log(entry)
-    // return "harBase"
+    if (isAnalytics(entry.request.url)) type = "analytics_endpoint"
+
+    if (isInternal && 
+        (entry.response.content.mimeType.startsWith("application/json") || entry?.request?.method == "POST")
+    ) type = "apiRequest_core"
+
     return {
         type,
         initiator: initiatorURL,
@@ -169,25 +95,19 @@ function classifier(entry, index_any, internalPredicate) {
     };
 }
 
-/**
- * @typedef {{id: number, path: string, label: string}} decomposedPath_t
- */
+/** @typedef {{id: number, path: string, label: string}} decomposedPath_t */
 
-/**
- * @type {decomposedPath_t[]}
- */
+/** @type {decomposedPath_t[]} */
 export let decomposedPaths = []
-function buildDescendingPath(entry, index) {
+
+function buildDescendingPath(entry) {
     let url = new URL(entry.request.url)
     let decomposedPath = (url.hostname + url.pathname).split("/")
     decomposedPath.pop()
-    // console.log(decomposedPath)
 
     decomposedPath.map((slug, index, full) => {
-        let fullPath = full.slice(0, index + 1).join("/") //this is fine
-        /**
-         * @type {bool}
-         */
+        let fullPath = full.slice(0, index + 1).join("/")
+
         let isID = uuidvalidator(slug) || isNumeric(slug)
         // Prevent duplicate slug creations
         let searchResults = decomposedPaths.findIndex((decomposed) => decomposed.path == fullPath)
@@ -215,105 +135,61 @@ const nodeTypes = {
     "api_path": ApiPath
 };
 
+
+// TODO: This has many loops... 
+// TODO: I should have one big reducer loop at the start that preprocesses this data THEN I deal with the logic.
 function Viewer_providerless() {
     let { harContent } = useContext(AppStateContext)
+    // Maybe use useNavigate?
     if (harContent == null) return location.replace("/")
+    
+    let instance = useReactFlow()
     /**
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
      */
     let [selectedNode, setSelectedNode] = useState(null);
     let [filter, setFilter] = useState("all");
+    
+    window["filter"] = filter // Make it globally available... Yikes. In the future, provide a Filter context.
 
-    window["filter"] = filter
-    let instance = useReactFlow()
-    /**
-     * @type {HARLog_Harambe}
-    */
+    /** @type {HARLog_Harambe} */
     let log = harContent["log"];
-    console.log(log)
 
-    let keywords = log.pages.flatMap((page) => new URL(page.title).hostname.split(".").slice(0, -1))
-    // console.log(keywords)
-    const isInternal = (comparisonList) => keywords.some(keyword => comparisonList.includes(keyword))
+    let keywords = log.pages.flatMap((page) => 
+        new URL(page.title).hostname.split(".").slice(0, -1))
 
+    const isInternal = (comparisonList) => 
+        keywords.some(keyword => comparisonList.includes(keyword))
 
-    // console.log(selectedNode)
-    // can use entry index as ID for nodes
-    // go through all API reqs?
-    // split by `/` and get each slug
-    // build a "tree"
-    // ```json
-    // {
-    // "services.balling.com" : {
-    //     "api":{
-    //          "users":[
-    //              "128303443",
-    //              "120385945"
-    //          ],
-    //          "posts":[
-    //              "edit",
-    //              "view"
-    //          ]
-    //     }
-    // }
-    // }```
+    let processedEntries = useMemo(() => log.entries.map(EntryToNode(isInternal)),[])
 
-    //  decomposedPaths = {}
-    //  id : /api/users/128303443 
-    //  label : 128303443
-    // id : /api/users/ 
-    //  label : users
-    // id: /api/ 
-    //  label : api
-
-    // decompostedPaths = [ {"id":"/api/users/128303443","label":"128303443"}, {"id":"/api/users/","label":"users"}, {"id":"/api/","label":"api"} ]
-
-    let classifiedEntries = useMemo(() => {
-        // REFACTOR IN PROGRESS
-        return log.entries.map((entry, index) => {
-            let entryClone = { ...entry }
-            let classified = classifier(entry, index, isInternal)
-            entryClone["_type"] = classified.type
-            entryClone["_data"] = classified.data
-            entryClone["_initiator_harambe"] = classified.initiator
-            if (entryClone["_type"] == "apiRequest_core") {
-                loggers.viewer_algos("Building path from", entry.request.url)
-                buildDescendingPath(entry, index)
-                // decomposedPaths[fullPath][ending] = true
-            }
-            return entryClone
-            // console.log(entry)
-        })
-    },[])
-
-
-    const findInitiator = (initiator) => {
-        let initiatorIndex = log.entries.findIndex(entry => entry?.request?.url == initiator)
-        return initiatorIndex == -1 ? "orphan" : log.entries[initiatorIndex].id
-    }
+    // TODO: create a lookup feature
+    const findInitiator = (initiator) =>
+        log.entries.find(entry => entry?.request?.url == initiator)?.id ?? "orphan"
 
     /**
      * This is where we begin processing 
      * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
      */
     let { nodes, edges } = useMemo(() => {
+        // TODO: See if this whole memoized function can be optimized
         let toplevel_parentID = "";
         layout = new Dagre.graphlib.Graph()
         layout.setGraph({ rankdir: "TB" });
         layout.setDefaultEdgeLabel(() => ({}));
 
-        let values = classifiedEntries;
+        /**
+         * @type {HAREntry_Harambe[]}
+         */
+        let values = processedEntries;
         values = filter == "all" ? values : values.filter((entry) => entry["_type"] == filter)
         let extraNodes = []
 
         if (filter == "apiRequest_core") {
             loggers.viewer_algos(filter, "Filtering by API request (internal)")
 
-            // PARSE SLUGS
-            // TODO: Compatibility with new system 
             extraNodes = decomposedPaths.map((pathObject) => {
                 let currentID = `${pathObject.id}-slug`
-                loggers.viewer_algos(pathObject)
                 let data = {
                     id: currentID,
                     type: "api_path",
@@ -322,58 +198,46 @@ function Viewer_providerless() {
                     ...mapToDimension("api_path")
                 }
                 layout.setNode(currentID, data)
+
                 const isRoot = pathObject.label == pathObject.path
                 if (!isRoot) {
                     const poppedPath = pathObject.path.split("/").slice(0, -1).join("/")
-                    // If its a child, it cant be an orphan - but best to avoid a crash due to not thinking it out fully.
-                    const parent = decomposedPaths.find((value) => poppedPath == value.path)?.id ?? "orphan"
-                    layout.setEdge(`${parent}-slug`, currentID)
+                    // Unlikely, but best to avoid a crash due to not thinking it out fully.
+                    const parent = decomposedPaths.find((value) => poppedPath == value.path)?.id
+
+                    layout.setEdge(`${parent ?? "orphan"}-slug`, currentID)
                 }
-                else {
-                    toplevel_parentID = currentID; //doesnt matter which top level node, so we're fine with the last one.
-                }
+
+                // Doesnt matter which top level node
+                else toplevel_parentID = currentID; 
 
                 return data;
             })
             loggers.viewer_algos("Extra Nodes:", extraNodes)
         }
 
-        values = values.map((entry, index) => {
+        values = values.map((entry) => {
+            // Using index is bad, as it'll change when the filter changes
             let ID = entry.id
-            console.log(entry, ID)
-            /**
-             * @type {import('reactflow').Node}
-             */
+            /** @type {import('reactflow').Node} */
             let data = {
                 id: ID,
                 type: entry["_type"],
                 data: entry,
                 focusable: true,
                 ...mapToDimension(entry["_type"]),
-                // width: customWidthMappings[entry["_type"]]?.width ??  customWidthMappings["default"]["width"],
-                // height: customWidthMappings[entry["_type"]]?.height ??  customWidthMappings["default"]["height"]
-                // rank: entry["_type"] == "media" ? 3 : 2 
             }
-            if (filter == "apiRequest_core"){
-
-            }
+            // TODO: Have special handling for the API Tree nodes OR implement them inside the nodes
             layout.setNode(ID, data)
 
-
-            // Find initiator in list with .filter()
-            // let initiator = entry["_initiator_harambe"]
             if (filter == "apiRequest_core") {
                 let url = new URL(entry.request.url)
-                let simplePath = (url.hostname + url.pathname)
+                let simplePath = (url.hostname + url.pathname) // No query params and protocol
 
                 const poppedPath = simplePath.split("/").slice(0, -1).join("/")
-                loggers.viewer_algos(poppedPath)
                 const searchResult = decomposedPaths.find((value) => poppedPath == value.path)
-                loggers.viewer_algos(poppedPath, "has a ", searchResult)
                 const parent = searchResult?.id ?? "orphan"
-                const edgeId = `${parent}-slug`
-                if (parent != "orphan")
-                    loggers.viewer_algos(`${poppedPath} has a parent slug! `, edgeId, searchResult.path)
+
                 layout.setEdge(`${parent}-slug`, ID)
             }
             else {
@@ -383,7 +247,6 @@ function Viewer_providerless() {
             return data
         })
 
-       // nodes[]
         values = [...values, ...extraNodes]
 
         Dagre.layout(layout);
@@ -391,10 +254,10 @@ function Viewer_providerless() {
         let nodes = []
         let edges = []
 
-        // TODO: See if this whole memoized function can be optimized
-        values.map((entry, index) => {
-            const { x, y, width, height } = layout.node(entry.id); //i think i assigned an incorrect type to Values...
-            // console.log(entry, x, y)
+        values.map((entry) => {
+            // TODO: Fix all  types
+            // I think I assigned an incorrect type to this...
+            const { x, y, width, height } = layout.node(entry.id); 
             nodes.push({
                 position: {
                     x: x - width / 2,
@@ -407,36 +270,26 @@ function Viewer_providerless() {
 
         setTimeout(() => {
             if (filter == "apiRequest_core") {
-                // let projectedCoords = instance.project({x,y})
-                // after logging i realize i have been using -slug-slug and toplevel_parentID is of the wrong type
                 let { x, y } = layout.node(toplevel_parentID)
-
                 instance.setCenter(x, y, { zoom: 1, duration: 200 })
-                // instance.setViewport({x, y, zoom:2})
             }
-            else {
+            else 
                 instance.fitView({ duration: 200, padding: .5 })
-            }
+            
         }, 100)
         return { nodes, edges };
 
     }, [filter])
     
-    // return { ...node, position: { x, y } };
+    if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) 
+        nodes[Number(selectedNode.id)].selected = true;
 
-    // console.log(edges)
-
-    if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) nodes[Number(selectedNode.id)].selected = true;
-
-    /**
-     * @type {import('reactflow').Edge[]}
-     */
+    /** @type {import('reactflow').Edge[]} */
     let customEdges = edges.map((edge) => { return { id: `${edge.v}-${edge.w}`, source: edge.v, target: edge.w } });
 
     // edges.
     return <>
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
-
             <div className='barHolder'>
                 <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
@@ -445,7 +298,7 @@ function Viewer_providerless() {
                 edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false}
                 minZoom={0} maxZoom={1000000} pannable={true}
                 fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }}
-                onNodeClick={(event, node) => { setSelectedNode(node) }}
+                onNodeClick={(_, node) => setSelectedNode(node)}
                 nodesFocusable={true} nodeTypes={nodeTypes}
                 proOptions={{ hideAttribution: true }}
                 edges={customEdges}
@@ -462,29 +315,21 @@ function Viewer_providerless() {
     </>
 }
 
-// Adding a top bar allows for more clear cut action paths to take
-
-// Inactive - no node selected
-// either gray out the buttons or dont include them at all
-// Left side: Active, but all disabled
-// Center "Select a node to get started",
-// Right side: Core API seeker [only shows REST API endpoints - hides CSS, Images, Analytics, etc]
-
-// Active
-// Left side:
-// Details #4 [Button to view expanded details in a modal]
-// Button to highlight / Add extra attention to this node
-// [...more]
-// Center
-// Inspecting [type_icon] https://example.com/
-// ||
-// Inspecting [type_icon] https://example.com/long_url/no_fit_he...\
-// Right Side
-// Core API seeker [only shows REST API endpoints - hides CSS, Images, Analytics, etc]
-// [...more]
-
-
-
+function EntryToNode(isInternal) {
+    return (entry) => {
+        let entryClone = { ...entry };
+        let classified = classifier(entry, isInternal);
+        // TODO: Document the _ properties
+        entryClone["_type"] = classified.type;
+        entryClone["_data"] = classified.data;
+        entryClone["_initiator_harambe"] = classified.initiator;
+        if (entryClone["_type"] == "apiRequest_core") {
+            loggers.viewer_algos("Building path from", entry.request.url);
+            buildDescendingPath(entry);
+        }
+        return entryClone;
+    };
+}
 
 export default function Viewer() {
     // This way, even the topbars have Reactflow hooks.  
