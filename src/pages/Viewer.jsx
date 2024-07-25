@@ -183,38 +183,6 @@ function Viewer_providerless() {
          */
         let values = processedEntries;
         values = filter == "all" ? values : values.filter((entry) => entry["_type"] == filter)
-        let extraNodes = []
-
-        if (filter == "apiRequest_core") {
-            loggers.viewer_algos(filter, "Filtering by API request (internal)")
-
-            extraNodes = decomposedPaths.map((pathObject) => {
-                let currentID = `${pathObject.id}-slug`
-                let data = {
-                    id: currentID,
-                    type: "api_path",
-                    data: pathObject,
-                    focusable: false,
-                    ...mapToDimension("api_path")
-                }
-                layout.setNode(currentID, data)
-
-                const isRoot = pathObject.label == pathObject.path
-                if (!isRoot) {
-                    const poppedPath = pathObject.path.split("/").slice(0, -1).join("/")
-                    // Unlikely, but best to avoid a crash due to not thinking it out fully.
-                    const parent = decomposedPaths.find((value) => poppedPath == value.path)?.id
-
-                    layout.setEdge(`${parent ?? "orphan"}-slug`, currentID)
-                }
-
-                // Doesnt matter which top level node
-                else toplevel_parentID = currentID; 
-
-                return data;
-            })
-            loggers.viewer_algos("Extra Nodes:", extraNodes)
-        }
 
         values = values.map((entry) => {
             // Using index is bad, as it'll change when the filter changes
@@ -246,6 +214,33 @@ function Viewer_providerless() {
             }
             return data
         })
+        
+        let extraNodes = []
+        if (filter == "apiRequest_core") {
+            loggers.viewer_algos(filter, "Filtering by API request (internal)")
+
+            extraNodes = decomposedPaths.map((pathObject) => {
+                let currentID = `${pathObject.id}-slug`
+                let data = {
+                    id: currentID,
+                    type: "api_path",
+                    data: pathObject,
+                    focusable: false,
+                    ...mapToDimension("api_path")
+                }
+                layout.setNode(currentID, data)
+
+                const isRoot = pathObject.label == pathObject.path
+                if (!isRoot) {
+                    const poppedPath = pathObject.path.split("/").slice(0, -1).join("/")
+                    const parent = decomposedPaths.find((value) => poppedPath == value.path)?.id
+                    layout.setEdge(`${parent ?? "orphan"}-slug`, currentID)
+                } else toplevel_parentID = currentID; 
+
+                return data;
+            })
+            loggers.viewer_algos("Extra Nodes:", extraNodes)
+        }
 
         values = [...values, ...extraNodes]
 
@@ -273,12 +268,9 @@ function Viewer_providerless() {
                 let { x, y } = layout.node(toplevel_parentID)
                 instance.setCenter(x, y, { zoom: 1, duration: 200 })
             }
-            else 
-                instance.fitView({ duration: 200, padding: .5 })
-            
+            else instance.fitView({ duration: 200, padding: .5 })
         }, 100)
         return { nodes, edges };
-
     }, [filter])
     
     if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) 
