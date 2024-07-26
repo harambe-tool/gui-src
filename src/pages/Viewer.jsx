@@ -140,7 +140,7 @@ const nodeTypes = {
 // TODO: This has many loops... 
 // TODO: I should have one big reducer loop at the start that preprocesses this data THEN I deal with the logic.
 function Viewer_providerless() {
-    let { harContent } = useContext(AppStateContext)
+    let { harContent, filter, setFilter } = useContext(AppStateContext)
     // Maybe use useNavigate?
     if (harContent == null) return location.replace("/")
     
@@ -149,7 +149,7 @@ function Viewer_providerless() {
      * @type {ReturnType<typeof useState<import('reactflow').Node>>}
      */
     let [selectedNode, setSelectedNode] = useState(null);
-    let [filter, setFilter] = useState("all");
+    // let [filter, setFilter] = useState("all");
     
     window["filter"] = filter // Make it globally available... Yikes. In the future, provide a Filter context.
 
@@ -287,7 +287,7 @@ function Viewer_providerless() {
                 <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
                 <div style={{position:"absolute", zIndex:9999, top:"6em", right:"2em"}}>
-                    <Search view_filtered={filter} setSelectedNode={setSelectedNode}></Search>
+                    <Search nodes={nodes} setSelectedNode={setSelectedNode}></Search>
                 </div>
             </div>
             <ReactFlow

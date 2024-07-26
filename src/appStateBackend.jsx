@@ -16,11 +16,13 @@ export const AppStateContext = createContext({
   preference: prefs,
   theme:{},
   highlightedNodes:{},
+  filter:"all",
   setHighlightedNodes:()=>{},
   setHarContent: (content) => {},
   setServerURL: (url) => {},
   setTheme: (theme) => {},
   setPreference: (preference) => {},
+  setFilter: ()=>{}
 });
 let seedColor = docDefault;
 export const AppStateProvider = ({ children }) => {
@@ -30,6 +32,7 @@ export const AppStateProvider = ({ children }) => {
   const dark = preference == "dark"
   const [theme, setTheme] = useState(new SchemeFidelity(Hct.fromInt(argbFromHex(docDefault)), dark, 0))
 
+  const [filter, setFilter] = useState("all")
   const [highlightedNodes, setHighlightedNodes] = useState({})
 
 
@@ -78,6 +81,8 @@ export const AppStateProvider = ({ children }) => {
         serverURL,
         theme,
         preference,
+        filter,
+        setFilter,
         setHarContent,
         setServerURL,
         setTheme:setThemeMiddleware,

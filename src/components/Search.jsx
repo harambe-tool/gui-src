@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { MdSearch } from "react-icons/md";
 import { useReactFlow, useStoreApi } from "reactflow"
+import { AppStateContext } from "../appStateBackend";
 
 /**
  * @typedef          {(
@@ -12,10 +13,11 @@ import { useReactFlow, useStoreApi } from "reactflow"
  */
 /**
  * 
- * @param {{setSelectedNode: React.Dispatch<React.SetStateAction<import "reactflow".Node<HAREntry_Harambe>>>}}  
+ * @param {{setSelectedNode: React.Dispatch<React.SetStateAction<import "reactflow".Node<HAREntry_Harambe>>>, nodes: import("reactflow").Node<HAREntry_Harambe>[]}}  
  * @returns 
  */
-export default function Search({setSelectedNode, view_filtered}){
+export default function Search({setSelectedNode, nodes}){
+    let { filter:viewFilters } = useContext(AppStateContext)
 
     let [visible, setVisible] = useState(false)
     let inputRef = React.createRef();
@@ -25,7 +27,8 @@ export default function Search({setSelectedNode, view_filtered}){
             if (e.ctrlKey && e.key === "f") { 
                 e.preventDefault();
                 setVisible(!visible)
-                if (!visible)inputRef.current.focus()
+                console.log(inputRef.current)
+                inputRef.current?.focus()
             }
         }
 
@@ -44,17 +47,18 @@ export default function Search({setSelectedNode, view_filtered}){
 
     const [resultIndex, setIndex] = useState(0)
     
-    /** @type {import("reactflow").Node<HAREntry_Harambe>[]} */
-    const nodes = useMemo(()=>flowInstance.getNodes(),[flowInstance, view_filtered])
+    // const nodes = useMemo(()=>{console.log(viewFilters); return flowInstance.getNodes(); },[flowInstance, viewFilters])
 
     
-    let insensitive_regex;
-    let sensitive_regex;
+    let insensitive_regex = new RegExp(".*");
+    let sensitive_regex = new RegExp(".*");
 
-    if (regexMode){
-        insensitive_regex = new RegExp(text, "i");
-        sensitive_regex = new RegExp(text);
-    }
+    try {
+        if (regexMode){
+            insensitive_regex = new RegExp(text, "i");
+            sensitive_regex = new RegExp(text);
+        }
+    } catch (e){ console.log("invalid regex") }
 
 
     /** @param {string} input */
@@ -76,7 +80,7 @@ export default function Search({setSelectedNode, view_filtered}){
     const headerReducer = (prev,curr)=>prev+(curr.name+":"+curr.value)
 
     // Go through the nodes
-    let result_ids = useMemo(()=>nodes.filter((node)=>{
+    let result_ids = nodes.filter((node)=>{
         // Filter by selection
         // Filter by text
         switch (filter) {
@@ -94,21 +98,24 @@ export default function Search({setSelectedNode, view_filtered}){
                 // If query params are content, I think URL makes more sense.
                 return matcher(node.data.request?.postData?.text ?? "")
             case "request_url":
-                return matcher(node.data.request.url)
+                // Request bodies shouldnt be null, but API slugs count as nodes.
+                return matcher(node.data.request?.url ?? "")
         };
-    }), [searchQuery, nodes])
+    }) //memoize breaks this!!
 
     let store = useStoreApi()
     const { addSelectedNodes } = store.getState()
 
     const zoomToResult = (resindex = null) => {
-
-        const currentResult = result_ids[resindex ?? resultIndex]
-        if (currentResult == undefined) return;
-        let {x, y} = currentResult
-        addSelectedNodes([currentResult.id])
-        setSelectedNode(currentResult)
-        flowInstance.setCenter(x,y, {zoom:1, duration:200})
+        if (visible){
+            const currentResult = result_ids[resindex ?? resultIndex]
+            console.log(currentResult)
+            if (currentResult == undefined) return;
+            let {x, y} = currentResult
+            addSelectedNodes([currentResult.id])
+            setSelectedNode(currentResult)
+            flowInstance.setCenter(x,y, {zoom:1, duration:200})
+        }
     };
 
     if (result_ids.length == 0) addSelectedNodes([])
@@ -139,6 +146,7 @@ export default function Search({setSelectedNode, view_filtered}){
                         setIndex(0);
                     }}
                     value={text} 
+                    ref={inputRef}
                     onChange={(e)=>setText(e.target.value)} />
                 
                 <button data-enabled={isCaseSensitive} 
