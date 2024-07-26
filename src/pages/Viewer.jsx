@@ -13,6 +13,7 @@ import fingerprintClassifier from '../utils/classifiers';
 import uuidvalidator from "uuid-validate"
 import { isNumeric } from '../utils/validators';
 import { loggers } from '../utils/loggers';
+import Search from '../components/Search';
 
 const trackers = [
     "https://www.google-analytics.com/g/collect",
@@ -168,8 +169,7 @@ function Viewer_providerless() {
         log.entries.find(entry => entry?.request?.url == initiator)?.id ?? "orphan"
 
     /**
-     * This is where we begin processing 
-     * @type {{values:import('reactflow').Node[], edges:{v:Number,w:Number}[]}}
+     * @type {{nodes:import('reactflow').Node<HAREntry_Harambe>[], edges:{v:Number,w:Number}[]}}
      */
     let { nodes, edges } = useMemo(() => {
         // TODO: See if this whole memoized function can be optimized
@@ -272,9 +272,10 @@ function Viewer_providerless() {
         }, 100)
         return { nodes, edges };
     }, [filter])
-    
-    if (selectedNode?.id && nodes[Number(selectedNode.id)] !== undefined) 
-        nodes[Number(selectedNode.id)].selected = true;
+
+    let selected_instance = nodes.find((e)=>e.id == selectedNode?.id)
+    if (selectedNode?.id && selected_instance !== undefined) 
+        selected_instance.selected = true;
 
     /** @type {import('reactflow').Edge[]} */
     let customEdges = edges.map((edge) => { return { id: `${edge.v}-${edge.w}`, source: edge.v, target: edge.w } });
@@ -285,6 +286,9 @@ function Viewer_providerless() {
             <div className='barHolder'>
                 <TopBar filterSetter={setFilter} selectedNode={selectedNode}></TopBar>
                 <DetailBar log={selectedNode?.data}></DetailBar>
+                <div style={{position:"absolute", zIndex:9999, top:"6em", right:"2em"}}>
+                    <Search view_filtered={filter} setSelectedNode={setSelectedNode}></Search>
+                </div>
             </div>
             <ReactFlow
                 edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false}

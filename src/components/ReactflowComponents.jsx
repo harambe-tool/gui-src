@@ -77,7 +77,7 @@ function CardCore(props){
   return (
     <>
       {visible && <ActionCards />}
-      <div className={`card ${props.className} ${props.selected ? "selected" : ""} ${highlighted ? "highlighted" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
+      <div className={`card ${props.className} ${selected ? "selected" : ""} ${highlighted ? "highlighted" : ""}`} style={{width:dimensions.width, height:dimensions.height}}>
         
         {props.children}
       </div>
