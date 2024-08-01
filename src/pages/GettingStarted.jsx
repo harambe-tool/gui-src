@@ -40,12 +40,12 @@ export default function Importer() {
 
   return (
     <>
-    <div onDragEnd={e=>{dragHandle(e,false)}} onDragOver={e=>{dragHandle(e,true)}} onDragLeave={e=>{dragHandle(e,false)}} style={{height:"100vh"}}>
+    <div onDragEnd={e=>{dragHandle(e,false)}} onDragOver={e=>{dragHandle(e,true)}} onDragLeave={e=>{dragHandle(e,false)}} style={{height:"100vh", background:"linear-gradient(43deg, var(--background), var(--onPrimaryFixedVariant))", color:"var(--primaryFixed)"}}>
       
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
           <div id="banner" style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
             <span style={{ fontSize: "2em" }}><b>harambe</b></span>
-            <span>Find links between requests and fuzz with AI.</span>
+            <span>Find links between requests and befriend gorillas.</span>
           </div>
           <div className="sep"></div>
           <div>

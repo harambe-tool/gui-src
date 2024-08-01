@@ -20,17 +20,19 @@ let customWidthMappings = {
     height:175
   },
   "apiRequest_external": {
-      width:700
+      width:700,
+      height:350
   },
   "apiRequest_core": {
       width:700,
+      height:350
   },
   "api_path":{
     height:175
   },
   "default": {
     width:250,
-    height:300
+    height:250
   }
   // "cdnAsset": HARBase,
   // "hostedAsset": HARBase

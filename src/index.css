@@ -195,6 +195,7 @@ button {
 .settings-button {
   position: absolute;
   display: flex;
+  color:inherit;
   top: 2em;
   right: 2em;
   background: rgb(255 255 255 / 2%);
