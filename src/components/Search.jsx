@@ -2,6 +2,16 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 import { MdSearch } from "react-icons/md";
 import { useReactFlow, useStoreApi } from "reactflow"
 import { AppStateContext } from "../appStateBackend";
+import { GenericDropdown } from "./TopBar";
+
+
+const mappings = {
+    "response_content": "Search for Response Content",
+    "response_headers": "Search for Response Headers",
+    "request_headers": "Search for Request Headers",
+    "request_content": "Search for Request Content",
+    "request_url": "Search for Request URL"
+}
 
 /**
  * @typedef          {(
@@ -21,17 +31,18 @@ export default function Search({setSelectedNode, nodes}){
 
     let [visible, setVisible] = useState(false)
     let inputRef = React.createRef();
+    
+    useEffect(()=>{
+        if (visible)inputRef.current?.focus();
+    }, [visible]);
 
     useEffect(()=>{
         let findHandler = (e) => {
             if (e.ctrlKey && e.key === "f") { 
                 e.preventDefault();
                 setVisible(!visible)
-                console.log(inputRef.current)
-                inputRef.current?.focus()
             }
         }
-
         window.addEventListener("keydown", findHandler)
         return ()=>{window.removeEventListener("keydown", findHandler)}
     }, [visible]);
@@ -80,7 +91,9 @@ export default function Search({setSelectedNode, nodes}){
     const headerReducer = (prev,curr)=>prev+(curr.name+":"+curr.value)
 
     // Go through the nodes
-    let result_ids = nodes.filter((node)=>{
+
+
+    let result_ids = useMemo(()=>nodes.filter((node)=>{
         // Filter by selection
         // Filter by text
         switch (filter) {
@@ -101,7 +114,8 @@ export default function Search({setSelectedNode, nodes}){
                 // Request bodies shouldnt be null, but API slugs count as nodes.
                 return matcher(node.data.request?.url ?? "")
         };
-    }) //memoize breaks this!!
+    }), [filter, searchQuery, viewFilters, nodes])
+     //memoize breaks this!!
 
     let store = useStoreApi()
     const { addSelectedNodes } = store.getState()
@@ -158,13 +172,35 @@ export default function Search({setSelectedNode, nodes}){
             </div>
             <button style={{height:"min-content",display:"flex"}} onClick={e=>{setQuery(text);zoomToResult()}}><MdSearch size={25}></MdSearch></button>
         </div>
-        <select value={filter} onChange={(e)=>setFilter(e.target.value)}>
-            <option value="response_content">Search for Response Content</option>
-            <option value="response_headers">Search for Response Headers</option>
-            <option value="request_headers">Search for Request Headers</option>
-            <option value="request_content">Search for Request Content</option>
-            <option value="request_url">Search for Request URL</option>
-        </select>
+        <GenericDropdown state={filter} callback={setFilter} mappings={mappings} />
         <span>{result_ids.length} result{result_ids.length != 1 && "s"}</span>
     </div>
 }
+
+// Will make into its own component eventually
+// function StyledSelect(filter, setFilter) {
+//     const [opened, setOpened] = useState(false)
+//     const [selection, setSelection] = useState("response_content")
+
+//     const mappings = {
+//         "response_content": "Search for Response Content",
+//         "response_headers": "Search for Response Headers",
+//         "request_headers": "Search for Request Headers",
+//         "request_content": "Search for Request Content",
+//         "request_url": "Search for Request URL"
+//     }
+
+//     const elementMapper = (val)=><div onClick={val} value={val}>{mappings[val]}</div>
+    
+//     return <div>
+//         <span className="select">{mappings[selection]}</span>
+//         {Object.keys(mappings).map(elementMapper)}
+//     </div>
+//     return <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+//         <option value="response_content">Search for Response Content</option>
+//         <option value="response_headers">Search for Response Headers</option>
+//         <option value="request_headers">Search for Request Headers</option>
+//         <option value="request_content">Search for Request Content</option>
+//         <option value="request_url">Search for Request URL</option>
+//     </select>;
+// }

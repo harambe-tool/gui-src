@@ -66,6 +66,33 @@ function Filter({filterSetter}) {
   );
 }
 
+export function GenericDropdown({mappings, state, callback}){
+  let [isShowingMenu, setShowMenu] = useState(false);
+
+  return <div>
+      <div onClick={() => setShowMenu(false)} onWheel={() => setShowMenu(false)} id="blurHandle" style={{position: "absolute", top:0,left:0,width:"100%",height:"100vh",zIndex:1000, display: isShowingMenu ? "block" : "none"}}></div>
+      <button id="filterButton" onClick={() => setShowMenu(!isShowingMenu)}>{mappings[state]}</button>
+      {
+        isShowingMenu && <fieldset id="filters" tabindex="0" style={{zIndex:1001}}>
+        {Object.entries(mappings).map(([key, value], index) => (
+          <button onClick={()=>callback(key)} key={key} className={key}>
+              <span style={{userSelect:"none"}}>{value}</span>
+              <input
+              tabIndex={0}
+              type="radio"
+              onChange={()=>callback(key)}
+              className={key}
+              checked={key==state}
+              id={key}
+              name="filters"
+              ></input>
+          </button>
+        ))}
+      </fieldset>
+    }
+  </div>
+}
+
 
 // function Filter({viewNodeSetter}){
 //     const supportedFilters = [

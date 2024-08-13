@@ -55,7 +55,7 @@
     justify-content: space-between;
 }
 #filters > button > span {
-    margin-right:1em;
+    /* margin-right:1em; */
 }
 
 #filters > button:hover {
@@ -69,4 +69,8 @@ input[type="radio"]:checked {
 
 #filterButton {
     width:20em;
+}
+
+#blurHandle {
+    max-height: 100%;
 }
