@@ -268,7 +268,7 @@ function Switcher({setter, getter}){
  * @returns 
  */
 export default function DetailModal({data, hide}){
-    let hasQueryParams = data.request.queryString.length > 0
+    let hasQueryParams = data.request?.queryString && (data.request.queryString?.length > 0)
     let requestHasData = data.request?.postData != null || hasQueryParams
     
     //  TODO: Create switcher for body and headers
@@ -287,8 +287,6 @@ export default function DetailModal({data, hide}){
     let respoContent = data.response.content?.text ?? ""
     let isb64respo = data.response.content.encoding == "base64"
     let containedURI = ("data:"+data.response.content.mimeType)+";base64,"+ (isb64respo ? respoContent : encode(respoContent))
-    
-
     
     return(
         <>

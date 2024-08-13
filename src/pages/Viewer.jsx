@@ -1,4 +1,4 @@
-import ReactFlow, { Background, Controls, ReactFlowProvider, useOnSelectionChange, useReactFlow } from 'reactflow';
+import ReactFlow, { Background, Controls, ReactFlowProvider, useOnSelectionChange, useReactFlow, useStoreApi } from 'reactflow';
 import { AppStateContext } from '../appStateBackend';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import './Viewer.css'
@@ -280,6 +280,9 @@ function Viewer_providerless() {
     /** @type {import('reactflow').Edge[]} */
     let customEdges = edges.map((edge) => { return { id: `${edge.v}-${edge.w}`, source: edge.v, target: edge.w } });
 
+    let store = useStoreApi()
+    const { addSelectedNodes } = store.getState()
+
     // edges.
     return <>
         <div className='viewer' style={{ "width": "100vw", "height": "100vh" }}>
@@ -291,6 +294,7 @@ function Viewer_providerless() {
                 </div>
             </div>
             <ReactFlow
+                onPaneClick={e=>{setSelectedNode(null); addSelectedNodes([]) }}
                 edgesFocusable={false} edgesUpdatable={false} nodesDraggable={false}
                 minZoom={0} maxZoom={1000000} pannable={true}
                 fitViewOptions={{ maxZoom: 1000000, minZoom: 0 }}
