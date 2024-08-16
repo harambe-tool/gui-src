@@ -88,20 +88,6 @@ h1 {
   line-height: 1.1;
 }
 
-/* @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-
 * {
   font-family: "Fira Code", monospace;
   font-optical-sizing: auto;
@@ -139,25 +125,6 @@ p b, a, h1 b, span b, .boldified {
 .sep .darkmode {
   border-top: 2px solid var(--onBackground);
 }
-
-/* code {
-  padding-inline: .2em;
-  margin: 0;
-  font-size: 85%;
-  background-color: rgba(175,184,193,0.2);
-  border-radius: 2px;
-  color: #9d94ff;
-}
-
-code {
-  display: inline;
-  max-width: fit-content;
-  margin: 0;
-  overflow: visible;
-  line-height: inherit;
-  word-wrap: normal;
-  border: 0;
-} */
 
 *::-webkit-scrollbar {
   width: 16px;

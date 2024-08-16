@@ -235,7 +235,8 @@ function Switcher({setter, getter}){
     const styleCreator = (visible) => {return {
         width: visible ? "revert-layer" : "0px",
         padding: visible ? "revert-layer" : "0px",
-        border: visible ? "revert-layer" : "0px" 
+        border: visible ? "revert-layer" : "0px",
+        minWidth: "0" 
     }}
     const buttonStyle = {
         background:"transparent",

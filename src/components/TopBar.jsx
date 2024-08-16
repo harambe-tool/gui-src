@@ -151,8 +151,8 @@ export default function TopBar({selectedNode, filterSetter}){
         <div className='left'>
             <button tabIndex={0} disabled={!isActive} onClick={() => setActiveModal("details")}>Details</button>
             <button tabIndex={1} disabled={!isActive} onClick={() => highlightHandler()}>Highlight</button>
-            <button tabIndex={2} disabled={!isActive}>Show Similar</button>
-            <button tabIndex={3} disabled={!isActive}>Initiators</button>
+            <button tabIndex={2} disabled={!isActive || true}>Show Similar</button>
+            <button tabIndex={3} disabled={!isActive || true}>Initiators</button>
         </div>
         <div className='center'>
             {isActive && <span>{isSlug ? data.path : data.request.url}</span>}
@@ -160,7 +160,7 @@ export default function TopBar({selectedNode, filterSetter}){
         </div>
         <div className='right'>
             <Filter filterSetter={filterSetter}></Filter>
-            <button>Core API Seeker</button>
+            <button disabled={true}>Core API Seeker</button>
         </div>
         { (activeModal != "") && <ModalContainer hideAction={hideAction} modal={modal}></ModalContainer> }
     </div>

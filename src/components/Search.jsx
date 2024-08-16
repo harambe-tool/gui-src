@@ -58,9 +58,6 @@ export default function Search({setSelectedNode, nodes}){
 
     const [resultIndex, setIndex] = useState(0)
     
-    // const nodes = useMemo(()=>{console.log(viewFilters); return flowInstance.getNodes(); },[flowInstance, viewFilters])
-
-    
     let insensitive_regex = new RegExp(".*");
     let sensitive_regex = new RegExp(".*");
 
@@ -90,32 +87,27 @@ export default function Search({setSelectedNode, nodes}){
      */
     const headerReducer = (prev,curr)=>prev+(curr.name+":"+curr.value)
 
-    // Go through the nodes
-
-
     let result_ids = useMemo(()=>nodes.filter((node)=>{
-        // Filter by selection
-        // Filter by text
+        // Can be a map / object instead
         switch (filter) {
             case "response_content":
                 return matcher(node.data.response?.content?.text ?? "")
             case "response_headers":
-                let resp_headers = node.data.response.headers
+                let resp_headers = node.data.response?.headers ?? []
                 let responseHeader_flat = resp_headers.reduce(headerReducer, "")
                 return matcher(responseHeader_flat)
             case "request_headers":
-                let req_headers = node.data.request.headers;
+                let req_headers = node.data.request?.headers ?? [];
                 let requestHeader_flat = req_headers.reduce(headerReducer, "")
                 return matcher(requestHeader_flat)
             case "request_content":
                 // If query params are content, I think URL makes more sense.
                 return matcher(node.data.request?.postData?.text ?? "")
             case "request_url":
-                // Request bodies shouldnt be null, but API slugs count as nodes.
+                // Request bodies *shouldnt* be null, but API slugs count as nodes.
                 return matcher(node.data.request?.url ?? "")
         };
     }), [filter, searchQuery, viewFilters, nodes])
-     //memoize breaks this!!
 
     let store = useStoreApi()
     const { addSelectedNodes } = store.getState()
@@ -134,9 +126,7 @@ export default function Search({setSelectedNode, nodes}){
 
     if (result_ids.length == 0) addSelectedNodes([])
     useMemo(zoomToResult, [searchQuery, nodes, filter]);
-    // console.log(result_ids)
 
-    // Controlled Input
     return <div style={{display: visible ? "flex" : "none"}} className="search">
         <div style={{display:"flex", alignContent:"center", alignItems:"center"}}>
             <div className="inputcontainer">
@@ -147,7 +137,6 @@ export default function Search({setSelectedNode, nodes}){
                             let newIndex = resultIndex;
                             
                             // wrap around
-
                             if (e.shiftKey)newIndex = resultIndex-1 < 0 ? result_ids.length-1 : resultIndex-1
                             else newIndex = Math.abs(resultIndex+1) % result_ids.length
                             // this as a ternary would be messier
@@ -176,31 +165,3 @@ export default function Search({setSelectedNode, nodes}){
         <span>{result_ids.length} result{result_ids.length != 1 && "s"}</span>
     </div>
 }
-
-// Will make into its own component eventually
-// function StyledSelect(filter, setFilter) {
-//     const [opened, setOpened] = useState(false)
-//     const [selection, setSelection] = useState("response_content")
-
-//     const mappings = {
-//         "response_content": "Search for Response Content",
-//         "response_headers": "Search for Response Headers",
-//         "request_headers": "Search for Request Headers",
-//         "request_content": "Search for Request Content",
-//         "request_url": "Search for Request URL"
-//     }
-
-//     const elementMapper = (val)=><div onClick={val} value={val}>{mappings[val]}</div>
-    
-//     return <div>
-//         <span className="select">{mappings[selection]}</span>
-//         {Object.keys(mappings).map(elementMapper)}
-//     </div>
-//     return <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-//         <option value="response_content">Search for Response Content</option>
-//         <option value="response_headers">Search for Response Headers</option>
-//         <option value="request_headers">Search for Request Headers</option>
-//         <option value="request_content">Search for Request Content</option>
-//         <option value="request_url">Search for Request URL</option>
-//     </select>;
-// }
