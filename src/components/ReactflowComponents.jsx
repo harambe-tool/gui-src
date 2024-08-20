@@ -28,7 +28,8 @@ let customWidthMappings = {
       height:350
   },
   "api_path":{
-    height:175
+    height:200,
+    width:300
   },
   "default": {
     width:250,

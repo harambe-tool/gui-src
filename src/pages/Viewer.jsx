@@ -308,7 +308,7 @@ function Viewer_providerless() {
                 defaultEdgeOptions={{ focusable: false, deletable: false, updatable: false }}
                 nodesConnectable={false}
                 fitView>
-                <Background />
+                <Background color="var(--primaryContainer)"/>
                 <Controls />
             </ReactFlow>
         </div>

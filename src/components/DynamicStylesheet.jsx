@@ -81,6 +81,7 @@ export default function DynamicStylesheet({config}){
         
         .card {
             border:2px solid ${color}1f;
+            background:${hexFromArgb(theme["surfaceContainer"])}af;
         }
 
         *::-webkit-scrollbar-track {
